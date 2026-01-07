@@ -1,0 +1,8 @@
+Map Data File
+Map-army-export.bmp
+WGS 84,WGS 84,   0.0000,   0.0000,WGS 84
+Map Projection,Latitude/Longitude,PolyCal,No,AutoCalOnly,No,BSBUseWPX,No
+Point01,xy,  203,  139,in, deg,  46.32,N, 21.78E
+Point02,xy, 1528,  779,in, deg,  46.22,N, 22.08E
+IWH,Map Image Width/Height,1920,928
+
