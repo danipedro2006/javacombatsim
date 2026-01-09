@@ -1,4 +1,4 @@
-package me.callsen.taylor.geotiff2java;
+package me.combatsim.java;
 
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;

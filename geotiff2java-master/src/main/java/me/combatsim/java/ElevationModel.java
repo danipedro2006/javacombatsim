@@ -1,4 +1,4 @@
-package me.callsen.taylor.geotiff2java;
+package me.combatsim.java;
 
 import java.awt.image.Raster;
 import java.net.URL;

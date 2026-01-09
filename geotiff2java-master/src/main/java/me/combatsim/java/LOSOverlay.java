@@ -1,4 +1,4 @@
-package me.callsen.taylor.geotiff2java;
+package me.combatsim.java;
 
 import java.awt.*;
 import java.awt.geom.Line2D;
@@ -99,4 +99,10 @@ public class LOSOverlay implements Overlay {
     public boolean isVisible() {
         return visible;
     }
+
+	@Override
+	public void setVisible(boolean visible) {
+		// TODO Auto-generated method stub
+		
+	}
 }

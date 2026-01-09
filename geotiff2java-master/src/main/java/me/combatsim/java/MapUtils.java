@@ -1,4 +1,4 @@
-package me.callsen.taylor.geotiff2java;
+package me.combatsim.java;
 
 import java.awt.geom.Point2D;
 import org.geotools.geometry.DirectPosition2D;
