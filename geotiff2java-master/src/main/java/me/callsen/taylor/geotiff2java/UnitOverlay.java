@@ -5,7 +5,8 @@ import java.awt.Graphics2D;
 public class UnitOverlay implements Overlay {
 
     private final UnitManager unitManager;
-
+     
+    private boolean visible = true; // units usually always visible
     public UnitOverlay(UnitManager unitManager) {
         this.unitManager = unitManager;
     }
@@ -17,5 +18,14 @@ public class UnitOverlay implements Overlay {
             int py = u.getPixelY() - u.getImage().getHeight()/2;
             g.drawImage(u.getImage(), px, py, null);
         }
+    }
+
+	@Override
+	public boolean isVisible() {
+		// TODO Auto-generated method stub
+		return visible;
+	}
+	public void setVisible(boolean visible) {
+        this.visible = visible;
     }
 }

@@ -17,8 +17,9 @@ public class LOSOverlay implements Overlay {
     private final int mapHeight;
 
     private final List<Line2D> losLines = new ArrayList<>();
-    private boolean visible = false;
-
+     
+    private boolean visible = true;
+    
     public LOSOverlay(ElevationModel dem, MathTransform wgsToUtm, int mapWidth, int mapHeight) throws Exception {
         this.dem = dem;
         this.utmToWgs = wgsToUtm.inverse(); // store inverse for UTM -> WGS84
