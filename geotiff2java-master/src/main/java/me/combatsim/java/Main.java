@@ -16,13 +16,24 @@ public class Main {
             try {
                 JFrame frame = new JFrame("Combat Simulator");
                
-                CombatSimulator app = new CombatSimulator();
+                CombatSimulator sim = new CombatSimulator();
 
+                JToolBar toolbar = ToolbarFactory.createToolbar(sim);
+
+                frame.add(toolbar, BorderLayout.NORTH);
+                frame.add(sim, BorderLayout.CENTER);
+
+                 
+
+                // 🔥 TEST UNIT BOOTSTRAP HERE
+                sim.getUnitBootstrap().loadFromCSV(
+                        "/me/combatsim/java/scenario.csv"
+                );
                 frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-                frame.setJMenuBar(MenuFactory.createMenuBar(app));
-                frame.add(ToolbarFactory.createToolbar(app), BorderLayout.NORTH);
-                frame.add(app, BorderLayout.CENTER);
-                frame.setContentPane(app);
+                frame.setJMenuBar(MenuFactory.createMenuBar(sim));
+                frame.add(ToolbarFactory.createToolbar(sim), BorderLayout.NORTH);
+                frame.add(sim, BorderLayout.CENTER);
+                frame.setContentPane(sim);
                 frame.pack();
                 frame.setLocationRelativeTo(null);
                 frame.setVisible(true);

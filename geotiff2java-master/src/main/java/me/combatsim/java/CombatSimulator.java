@@ -1,31 +1,38 @@
 package me.combatsim.java;
 
-import java.awt.Color;
-import java.awt.Dimension;
-import java.awt.Graphics;
-import java.awt.Graphics2D;
+import java.awt.*;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionAdapter;
 
 import javax.swing.JPanel;
-import javax.swing.JToolBar;
 
 public class CombatSimulator extends JPanel {
 
     private final MapContext ctx;
     private final UnitManager unitManager;
+    private final UnitFactory unitFactory;
+    private final UnitBootstrap unitBootstrap;
     private final OverlayManager overlayManager;
-    public JToolBar toolbar;
+
     private int mouseX = -1, mouseY = -1;
-   
+
     public CombatSimulator() throws Exception {
-    	toolbar = new JToolBar("Applications");
+
+        // ---- Map / CRS / DEM ----
         ctx = new MapContext();
-        unitManager = UnitBootstrap.create(ctx);
+
+        // ---- Core simulation objects ----
+        unitManager = new UnitManager(ctx.utmToWgs, ctx.dem);
+        unitFactory = new UnitFactory(ctx.dem, ctx.wgsToUtm, ctx.utmToWgs);
+        unitBootstrap = new UnitBootstrap(unitFactory, unitManager);
+
+        // ---- Overlays ----
         overlayManager = OverlayBootstrap.create(ctx, unitManager);
 
+        // ---- Input ----
         new InputController(this, overlayManager);
 
+        // ---- Mouse tracking ----
         addMouseMotionListener(new MouseMotionAdapter() {
             @Override
             public void mouseMoved(MouseEvent e) {
@@ -40,26 +47,30 @@ public class CombatSimulator extends JPanel {
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
 
+        // Base map
         g.drawImage(ctx.map, 0, 0, null);
 
+        // Units
         unitManager.updateRenderPositions();
         unitManager.draw(g);
 
+        // Overlays
         overlayManager.drawOverlays((Graphics2D) g);
 
-        if (mouseX >= 0) {
+        // Mouse UTM display
+        if (mouseX >= 0 && mouseY >= 0) {
             try {
                 var utm = MapUtils.pixelToUTM(mouseX, mouseY, ctx.wgsToUtm);
                 double z = MapUtils.getElevationAtPixel(ctx.dem, mouseX, mouseY);
 
-                g.setColor(new Color(0,0,0,170));
-                g.fillRect(5,5,420,25);
+                g.setColor(new Color(0, 0, 0, 170));
+                g.fillRect(5, 5, 420, 25);
 
                 g.setColor(Color.WHITE);
                 g.drawString(
-                    String.format("UTM X %.1f  Y %.1f  Z %.1f m",
-                        utm.x, utm.y, z),
-                    10,22
+                        String.format("UTM X %.1f  Y %.1f  Z %.1f m",
+                                utm.x, utm.y, z),
+                        10, 22
                 );
             } catch (Exception ignored) {}
         }
@@ -70,13 +81,23 @@ public class CombatSimulator extends JPanel {
         return new Dimension(ctx.map.getWidth(), ctx.map.getHeight());
     }
 
-	public static Object toggleLOS() {
-		// TODO Auto-generated method stub
-		return null;
-	}
+    // Expose for menus / UI
+    public UnitBootstrap getUnitBootstrap() {
+        return unitBootstrap;
+    }
 
-	public Object toggleOperations() {
-		// TODO Auto-generated method stub
-		return null;
-	}
+    public UnitManager getUnitManager() {
+        return unitManager;
+    }
+
+    public void toggleLOS() {
+        overlayManager.toggle(LOSOverlay.class);
+        repaint();
+    }
+
+    public void toggleOperations() {
+        overlayManager.toggle(BitmapOverlay.class);
+        repaint();
+    }
+
 }

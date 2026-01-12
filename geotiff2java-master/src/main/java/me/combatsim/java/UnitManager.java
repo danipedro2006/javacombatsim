@@ -15,7 +15,7 @@ import org.opengis.referencing.operation.MathTransform;
  */
 public class UnitManager {
 
-    private final List<Unit> units = new ArrayList<>();
+    final List<Unit> units = new ArrayList<>();
     private final ElevationModel dem; 
     
     // Transform used to convert UTM → WGS84 → pixel
@@ -137,4 +137,9 @@ public class UnitManager {
             );
         }
     }
+
+	public void add(Unit unit) {
+		units.add(unit);
+		
+	}
 }

@@ -1,24 +1,22 @@
 package me.combatsim.java;
 
- 
-
 import javax.swing.*;
 
 public class ToolbarFactory {
 
-    public static JToolBar createToolbar(CombatSimulator app) {
+    public static JToolBar createToolbar(CombatSimulator sim) {
 
-        JToolBar tb = new JToolBar();
+        JToolBar bar = new JToolBar();
 
         JButton losBtn = new JButton("LOS");
-        losBtn.addActionListener(e -> CombatSimulator.toggleLOS());
+        losBtn.addActionListener(e -> sim.toggleLOS());
 
-        JButton opsBtn = new JButton("Ops");
-        opsBtn.addActionListener(e -> app.toggleOperations());
+        JButton opsBtn = new JButton("OPS");
+        opsBtn.addActionListener(e -> sim.toggleOperations());
 
-        tb.add(losBtn);
-        tb.add(opsBtn);
+        bar.add(losBtn);
+        bar.add(opsBtn);
 
-        return tb;
+        return bar;
     }
 }

@@ -1,23 +1,68 @@
 package me.combatsim.java;
 
-public class UnitBootstrap {
- 
-		public UnitManager unitManager;
-		 static UnitFactory factory = new UnitFactory(MapContext.dem, MapContext.wgsToUtm, MapContext.utmToWgs);
-		// ---- Create units ----
-		static UnitManager create(MapContext ctx) throws Exception {
-			       
-					UnitManager unitManager = new UnitManager(ctx.utmToWgs, ctx.dem);
-					//Unit infantry = new Unit(800, 400, "infantry.bmp", ctx.dem, ctx.wgsToUtm, ctx.utmToWgs);
-					//Unit tank = new Unit(900, 700, "tank.bmp", ctx.dem, ctx.wgsToUtm, ctx.utmToWgs);
-					Unit infantry1 = factory.createInfantry(800, 400, UnitTeam.FRIENDLY);
-					Unit infantry2 = factory.createInfantry(800, 600, UnitTeam.FRIENDLY);
-					Unit tank = factory.createTank(900, 600, UnitTeam.ENEMY);
-					unitManager.addUnit(infantry1);
-					unitManager.addUnit(infantry2);
-					unitManager.addUnit(tank);
-					
-					return unitManager;
-		}
-				}
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
 
+public class UnitBootstrap {
+
+    private final UnitFactory factory;
+    final UnitManager unitManager;
+
+    public UnitBootstrap(UnitFactory factory, UnitManager unitManager) {
+        this.factory = factory;
+        this.unitManager = unitManager;
+    }
+
+    public void loadFromCSV(String resourcePath) throws Exception {
+
+        BufferedReader reader = new BufferedReader(
+                new InputStreamReader(
+                        UnitBootstrap.class.getResourceAsStream("/me/combatsim/java/scenario.csv")
+                )
+        );
+
+        if (reader == null) {
+            throw new IllegalArgumentException("Scenario file not found: " + resourcePath);
+        }
+
+        String line;
+        boolean firstLine = true;
+
+        while ((line = reader.readLine()) != null) {
+
+            if (firstLine) {
+                firstLine = false;
+                continue;
+            }
+
+            String[] parts = line.split(",");
+            if (parts.length < 4) continue;
+
+            UnitType type = UnitType.valueOf(parts[0].trim());
+            UnitTeam team = UnitTeam.valueOf(parts[1].trim());
+            int x = Integer.parseInt(parts[2].trim());
+            int y = Integer.parseInt(parts[3].trim());
+
+            Unit unit = null;
+
+            switch (type) {
+                case INFANTRY:
+                    unit = factory.createInfantry(x, y, team);
+                    unitManager.units.add(unit);
+                    break;
+
+                case TANK:
+                    unit = factory.createTank(x, y, team);
+                    unitManager.add(unit);
+                    break;
+
+                default:
+                    throw new IllegalArgumentException("Unknown unit type: " + type);
+            }
+
+            unitManager.addUnit(unit);
+        }
+
+        reader.close();
+    }
+}
