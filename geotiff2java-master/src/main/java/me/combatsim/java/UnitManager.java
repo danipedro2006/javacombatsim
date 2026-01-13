@@ -16,6 +16,7 @@ import org.opengis.referencing.operation.MathTransform;
 public class UnitManager {
 
     final List<Unit> units = new ArrayList<>();
+  
     private final ElevationModel dem; 
     
     // Transform used to convert UTM → WGS84 → pixel
@@ -30,9 +31,7 @@ public class UnitManager {
        UNIT MANAGEMENT
        ========================= */
 
-    public void addUnit(Unit unit) {
-        units.add(unit);
-    }
+    
 
     public void removeUnit(Unit unit) {
         units.remove(unit);
@@ -138,8 +137,31 @@ public class UnitManager {
         }
     }
 
-	public void add(Unit unit) {
-		units.add(unit);
+	
+	
+    public List<Unit> getFriendlyUnits() {
+        List<Unit> result = new ArrayList<>();
+        for (Unit u : units) {
+            if (u.getUnitTeam() == UnitTeam.FRIENDLY) {
+                result.add(u);
+            }
+        }
+        return result;
+    }
+
+    public List<Unit> getEnemyUnits() {
+        List<Unit> result = new ArrayList<>();
+        for (Unit u : units) {
+            if (u.getUnitTeam() == UnitTeam.ENEMY) {
+                result.add(u);
+            }
+        }
+        return result;
+    }
+
+
+	public void addUnit(Unit u) {
+		units.add(u);
 		
 	}
 }

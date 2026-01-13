@@ -1,5 +1,4 @@
-type,team,x,y
-INFANTRY,FRIENDLY,800,600
-INFANTRY,ENEMY,700,600
-TANK,FRIENDLY,600,800
-TANK,FRIENDLY,650,850
+name,type,team,x,y,visible,sensorRange,combatPower,speed,weapon,radius,symbol
+BRAVO,INFANTRY,ENEMY,800,600,true,5000,10,20,Javelin,20, infantry_blue.bmp
+ALFA,INFANTRY,FRIENDLY,850,650,true,5000,10,20,Javelin,20, infantry.bmp
+ 

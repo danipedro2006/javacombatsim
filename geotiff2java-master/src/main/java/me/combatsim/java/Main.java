@@ -26,9 +26,9 @@ public class Main {
                  
 
                 // 🔥 TEST UNIT BOOTSTRAP HERE
-                sim.getUnitBootstrap().loadFromCSV(
-                        "/me/combatsim/java/scenario.csv"
-                );
+                WeaponLoader.loadFromCSV("/me/combatsim/java/weapons.csv");
+				sim.getUnitBootstrap().loadFromCSV( "/me/combatsim/java/scenario.csv" );
+				 
                 frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
                 frame.setJMenuBar(MenuFactory.createMenuBar(sim));
                 frame.add(ToolbarFactory.createToolbar(sim), BorderLayout.NORTH);
@@ -44,3 +44,4 @@ public class Main {
         });
     }
 }
+ 

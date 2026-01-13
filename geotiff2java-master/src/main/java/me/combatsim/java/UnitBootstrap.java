@@ -6,7 +6,7 @@ import java.io.InputStreamReader;
 public class UnitBootstrap {
 
     private final UnitFactory factory;
-    final UnitManager unitManager;
+    private final UnitManager unitManager;
 
     public UnitBootstrap(UnitFactory factory, UnitManager unitManager) {
         this.factory = factory;
@@ -16,9 +16,9 @@ public class UnitBootstrap {
     public void loadFromCSV(String resourcePath) throws Exception {
 
         BufferedReader reader = new BufferedReader(
-                new InputStreamReader(
-                        UnitBootstrap.class.getResourceAsStream("/me/combatsim/java/scenario.csv")
-                )
+            new InputStreamReader(
+                UnitBootstrap.class.getResourceAsStream(resourcePath)
+            )
         );
 
         if (reader == null) {
@@ -35,32 +35,41 @@ public class UnitBootstrap {
                 continue;
             }
 
-            String[] parts = line.split(",");
-            if (parts.length < 4) continue;
-
-            UnitType type = UnitType.valueOf(parts[0].trim());
-            UnitTeam team = UnitTeam.valueOf(parts[1].trim());
-            int x = Integer.parseInt(parts[2].trim());
-            int y = Integer.parseInt(parts[3].trim());
-
-            Unit unit = null;
-
-            switch (type) {
-                case INFANTRY:
-                    unit = factory.createInfantry(x, y, team);
-                    unitManager.units.add(unit);
-                    break;
-
-                case TANK:
-                    unit = factory.createTank(x, y, team);
-                    unitManager.add(unit);
-                    break;
-
-                default:
-                    throw new IllegalArgumentException("Unknown unit type: " + type);
+            String[] p = line.split(",");
+            if (p.length < 12) {
+                System.err.println("Invalid scenario row: " + line);
+                continue;
             }
 
-            unitManager.addUnit(unit);
+            String name = p[0].trim();
+            UnitType type = UnitType.valueOf(p[1].trim());
+            UnitTeam team = UnitTeam.valueOf(p[2].trim());
+            int x = Integer.parseInt(p[3].trim());
+            int y = Integer.parseInt(p[4].trim());
+            boolean visible = Boolean.parseBoolean(p[5].trim());
+            double sensor = Double.parseDouble(p[6].trim());
+            double combat = Double.parseDouble(p[7].trim());
+            double speed = Double.parseDouble(p[8].trim());
+            WeaponDefinition weapon = WeaponRepository.get(p[9].trim());
+            double radius = Double.parseDouble(p[10].trim());
+            String symbol = p[11].trim();
+
+            Unit u = factory.createUnit(
+                name,
+                type,
+                team,
+                x,
+                y,
+                visible,
+                sensor,
+                combat,
+                speed,
+                weapon,
+                radius,
+                symbol
+            );
+
+            unitManager.addUnit(u);
         }
 
         reader.close();

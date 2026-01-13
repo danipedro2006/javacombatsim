@@ -1,5 +1,4 @@
 package me.combatsim.java;
-
 import java.awt.geom.Point2D;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
@@ -24,25 +23,48 @@ public class Unit {
 	private boolean isVisible;
 	// private Status status;
 	private double sensorRange;
-	private Enum unitType;
-	private Enum unitTeam;
+	private UnitType unitType;
+	private UnitTeam unitTeam;
 	private double combatPower;
+	private String mapSymbol;
 	private double speed;
     private List<Point> path = new ArrayList<>();
-	private List<CombatSystem> armament;
 	private final BufferedImage image;
-	private CombatSystem weapon;
+	private WeaponDefinition weapon;
 	private double unitRadius;
-	
-	public Unit(int startPixelX, int startPixelY, String mapSymbol, // ← just "infantry.bmp"
-			ElevationModel dem, MathTransform wgsToUtm, MathTransform utmToWgs) throws Exception {
+	//name,type,team,x,y,visible,sensorRange,combatPower,speed,weapon,radius,symbol
+	public Unit(String name,
+			UnitType unitType, 
+			UnitTeam unitTeam,
+			int startPixelX, 
+			int startPixelY, 
+			boolean isVisible, 
+			double sensorRange, 
+			double combatPower, 
+			double speed, 
+			WeaponDefinition weapon,
+			double unitRadius,
+			String mapSymbol, // ← just "infantry.bmp"
+			
+			ElevationModel dem, 
+			MathTransform wgsToUtm, 
+			MathTransform utmToWgs) throws Exception {
 
 		// Pixel → UTM
 		DirectPosition2D utm = MapUtils.pixelToUTM(startPixelX, startPixelY, wgsToUtm);
-
+		this.name=name;
+		this.unitType=unitType;
+		this.unitTeam=unitTeam;
 		this.utmX = utm.x;
 		this.utmY = utm.y;
 		this.utmZ = MapUtils.getElevationAtPixel(dem, startPixelX, startPixelY);
+		this.isVisible=isVisible;
+		this.sensorRange=sensorRange;
+		this.combatPower=combatPower;
+		this.speed=speed;
+		this.weapon=weapon;
+		this.unitRadius=unitRadius;
+		this.mapSymbol=mapSymbol;
 
 		// ---- LOAD IMAGE FROM RESOURCES ----
 		this.image = ImageIO.read(Unit.class.getResource("/" + mapSymbol));
@@ -135,14 +157,14 @@ public class Unit {
 	}
 
 	public void setUnitType(Enum unitType) {
-	    this.unitType = unitType;
+	    this.unitType = (UnitType) unitType;
 	}
 
 	public void setUnitTeam(Enum unitTeam) {
-	    this.unitTeam = unitTeam;
+	    this.unitTeam = (UnitTeam) unitTeam;
 	}
 
-	public void setWeapon(CombatSystem weapon) {
+	public void setWeapon(WeaponDefinition weapon) {
 	    this.weapon = weapon;
 	}
 
@@ -168,4 +190,100 @@ public class Unit {
 		}
 
 	}
+	
+	public boolean canDetect(Unit e, ElevationModel dem, MathTransform utmToWgs) {
+	    if (!this.isAlive() || !e.isAlive()) return false;
+
+	    double distance = this.distance2dTo(e); // 2D distance is enough
+	    return distance <= this.sensorRange;
+	}
+
+	private boolean isAlive() {
+		// TODO Auto-generated method stub
+		return true;
+	}
+
+	/*
+	 * public boolean canDetect(Unit target, ElevationModel dem, MathTransform
+	 * utmToWgs) {
+	 * 
+	 * // Cannot detect self if (target == this) return false;
+	 * 
+	 * // Must have sensor range if (sensorRange <= 0) return false;
+	 * 
+	 * // Distance check (2D) double distance = distance2dTo(target); if (distance >
+	 * sensorRange) return false;
+	 * 
+	 * // Line of sight check return hasLOS(this, target, dem, utmToWgs); }
+	 */
+	 
+	public static boolean hasLOS(Unit a, Unit b,
+            ElevationModel dem,
+            MathTransform utmToWgs) {
+// Simple step-based LOS (can be optimized later)
+int steps = 50;
+double dx = (b.utmX - a.utmX) / steps;
+double dy = (b.utmY - a.utmY) / steps;
+
+double startZ = a.utmZ;
+double endZ = b.utmZ;
+
+for (int i = 1; i < steps; i++) {
+double x = a.utmX + dx * i;
+double y = a.utmY + dy * i;
+
+double expectedZ = startZ + (endZ - startZ) * (i / (double) steps);
+
+try {
+DirectPosition2D wgs = new DirectPosition2D();
+utmToWgs.transform(new DirectPosition2D(x, y), wgs);
+
+Point2D px = MapUtils.wgs84ToPixel(wgs.y, wgs.x);
+double terrainZ = MapUtils.getElevationAtPixel(
+   dem, (int) px.getX(), (int) px.getY()
+);
+
+if (terrainZ > expectedZ) {
+return false;
+}
+} catch (Exception e) {
+return false;
+}
+}
+
+return true;
+}
+
+
+	public String getName() {
+		// TODO Auto-generated method stub
+		return name;
+	}
+public String getmapSymbol() {
+	return mapSymbol;
+}
+	public UnitTeam getUnitTeam() {
+		// TODO Auto-generated method stub
+		return unitTeam;
+	}
+
+	public Double getSensorRange() {
+		// TODO Auto-generated method stub
+		return sensorRange;
+	}
+
+	public WeaponDefinition getWeapon() {
+		// TODO Auto-generated method stub
+		return weapon;
+	}
+
+	public UnitType getUnitType() {
+		// TODO Auto-generated method stub
+		return unitType;
+	}
+	public double getunitRadius() {
+		// TODO Auto-generated method stub
+		return unitRadius;
+	}
+	
 }

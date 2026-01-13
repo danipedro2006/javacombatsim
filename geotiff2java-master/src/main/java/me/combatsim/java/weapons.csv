@@ -1,0 +1,4 @@
+id,category,minRange,maxrange,killProb,flightSpeed,requireLOS,effectRadius,precision
+Javelin,ATGM,600,4000,0.9,600,TRUE,20,10,10
+Cannon,TANK,600,3000,0.9,600,TRUE,20,10,10
+MG,TANK,600,3000,0.9,600,TRUE,20,10,10
