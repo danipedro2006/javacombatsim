@@ -16,7 +16,7 @@ public class Unit {
 	private double utmX;
 	private double utmY;
 	private double utmZ;
-	private boolean destroyed;
+	 
 	// ---- CACHED RENDER POSITION ----
 	private int pixelX;
 	private int pixelY;
@@ -177,11 +177,7 @@ public class Unit {
 	    isVisible = visible;
 	}
 	
-	 
-
-	public void setDestroyed(boolean destroyed) {
-	    this.destroyed = destroyed;
-	}
+	  
 
 	public WeaponDefinition getWeapon() {
 	    return weapon;
@@ -209,10 +205,7 @@ public class Unit {
 	    return distance <= this.sensorRange;
 	}
 
-	public UnitStatus isAlive() {
-	    return getUnitStatus();
-	}
-
+	  
 
 	/*
 	 * public boolean canDetect(Unit target, ElevationModel dem, MathTransform
@@ -301,7 +294,9 @@ public String getmapSymbol() {
 	public void setUnitStatus(UnitStatus unitStatus) {
 		this.unitStatus = unitStatus;
 	}
-
+	public boolean isAlive() {
+	    return unitStatus == UnitStatus.ALIVE;
+	}
 	 
 	
 }

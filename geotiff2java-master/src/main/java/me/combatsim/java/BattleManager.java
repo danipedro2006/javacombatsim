@@ -9,8 +9,7 @@ public class BattleManager {
     private final DetectionManager detectionManager;
     private final Random rand = new Random();
 
-    public BattleManager(UnitManager unitManager,
-                         DetectionManager detectionManager) {
+    public BattleManager(UnitManager unitManager, DetectionManager detectionManager) {
         this.unitManager = unitManager;
         this.detectionManager = detectionManager;
     }
@@ -18,10 +17,10 @@ public class BattleManager {
     /** Run one combat turn */
     public void runTurn() {
 
-        // Update detection first
+        // Update detection first (use current units in UnitManager)
         detectionManager.update(
-                unitManager.getFriendlyUnits(),
-                unitManager.getEnemyUnits()
+            unitManager.getFriendlyUnits(),
+            unitManager.getEnemyUnits()
         );
 
         // Friendly units attack
@@ -37,25 +36,16 @@ public class BattleManager {
 
     /** Resolve combat for a single unit */
     private void resolveCombatForUnit(Unit attacker) {
+        if (attacker.getUnitStatus() != UnitStatus.ALIVE) return;
 
-        if (!(attacker.isAlive()==UnitStatus.ALIVE)) {
-            return;
-        }
+        List<Unit> detectedTargets = detectionManager.getDetectedUnits(attacker);
+        if (detectedTargets == null || detectedTargets.isEmpty()) return;
 
-        List<Unit> detectedTargets =
-                detectionManager.getDetectedUnits(attacker);
-
-        if (detectedTargets == null || detectedTargets.isEmpty()) {
-            return;
-        }
-
+        // Find closest alive target
         Unit closestTarget = null;
         double closestDistance = Double.MAX_VALUE;
-
         for (Unit target : detectedTargets) {
-            if (!(target.isAlive()==UnitStatus.ALIVE)) {
-                continue;
-            }
+            if (target.getUnitStatus() != UnitStatus.ALIVE) continue;
 
             double dist = attacker.distance2dTo(target);
             if (dist < closestDistance) {
@@ -71,36 +61,28 @@ public class BattleManager {
 
     /** Simple combat resolution */
     private void attack(Unit attacker, Unit target) {
+        if (attacker.getUnitStatus() != UnitStatus.ALIVE) return;
+        if (target.getUnitStatus() != UnitStatus.ALIVE) return;
 
         WeaponDefinition weapon = attacker.getWeapon();
-        if (weapon == null) {
-            return;
-        }
+        if (weapon == null) return;
 
         double distance = attacker.distance2dTo(target);
+        if (distance > weapon.getMaxRange()) return;
 
-        if (distance > weapon.getMaxRange()) {
-            return;
-        }
+        double hitChance = weapon.getKillProbability();
+        hitChance = Math.max(0.05, Math.min(0.95, hitChance));
 
-        double hitChance =
-                weapon.getKillProbability();
-
-        if (hitChance < 0.05) hitChance = 0.05;
-        if (hitChance > 0.95) hitChance = 0.95;
-
-        if (rand.nextDouble() < hitChance) {
+        // Attack
+        boolean destroyed = rand.nextDouble() < hitChance;
+        if (destroyed) {
+            // Update the *same instance* of the unit in UnitManager
             target.setUnitStatus(UnitStatus.DESTROYED);
-            System.out.println(
-                "[COMBAT] " + attacker.getName() +
-                " destroyed " + target.getName()
-            );
+            System.out.println("[COMBAT] " + attacker.getName() +
+                               " destroyed " + target.getName());
         } else {
-            System.out.println(
-                "[COMBAT] " + attacker.getName() +
-                " attacked " + target.getName() +
-                " but missed"
-            );
+            System.out.println("[COMBAT] " + attacker.getName() +
+                               " attacked " + target.getName() + " but missed");
         }
     }
 }

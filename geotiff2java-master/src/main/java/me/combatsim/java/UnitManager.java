@@ -1,6 +1,10 @@
 package me.combatsim.java;
 
+import java.awt.AlphaComposite;
+import java.awt.BasicStroke;
+import java.awt.Color;
 import java.awt.Graphics;
+import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -10,16 +14,11 @@ import org.opengis.referencing.operation.MathTransform;
 
 /**
  * Manages all combat units.
- * - Units are stored and simulated in UTM coordinates
- * - Pixel coordinates are derived only for rendering
  */
 public class UnitManager {
 
-    final List<Unit> units = new ArrayList<>();
-  
-    private final ElevationModel dem; 
-    
-    // Transform used to convert UTM → WGS84 → pixel
+    private final List<Unit> units = new ArrayList<>();
+    private final ElevationModel dem;
     private final MathTransform utmToWgs;
 
     public UnitManager(MathTransform utmToWgs, ElevationModel dem) {
@@ -31,120 +30,22 @@ public class UnitManager {
        UNIT MANAGEMENT
        ========================= */
 
-    
-
-    public void removeUnit(Unit unit) {
-        units.remove(unit);
-    }
-    
-    public boolean hasLOS(Unit a, Unit b) {
-        double dx = b.getUtmX() - a.getUtmX();
-        double dy = b.getUtmY() - a.getUtmY();
-        double distance = Math.sqrt(dx*dx + dy*dy);
-        
-        int steps = 100;
-        for (int i = 1; i <= steps; i++) {
-            double t = i / (double) steps;
-            double x = a.getUtmX() + dx * t;
-            double y = a.getUtmY() + dy * t;
-            double z = a.getUtmZ() + (b.getUtmZ() - a.getUtmZ()) * t;
-
-            double terrainZ = MapUtils.getElevationAtUTM(dem, x, y);
-            if (terrainZ > z) return false; // blocked
-        }
-        return true;
+    public void addUnit(Unit u) {
+        units.add(u);
     }
 
-
-    public void clear() {
-        units.clear();
+    public void removeUnit(Unit u) {
+        units.remove(u);
     }
 
-    /** Immutable view of units */
     public List<Unit> getUnits() {
         return Collections.unmodifiableList(units);
     }
 
-    /* =========================
-       UPDATE / SIMULATION
-       ========================= */
-
-    /**
-     * Update pixel positions for all units.
-     * Call once per frame or after movement.
-     */
-    public void updateRenderPositions() {
-        for (Unit u : units) {
-            try {
-                u.updatePixelPosition(utmToWgs);
-            } catch (Exception e) {
-                // Unit outside map or transform failure
-            }
-        }
-    }
-
-    /* =========================
-       RENDERING
-       ========================= */
-
-    /**
-     * Draw all units on the given Graphics context.
-     */
-    public void draw(Graphics g) {
-        for (Unit u : units) {
-            BufferedImage img = u.getImage();
-
-            int x = u.getPixelX() - img.getWidth() / 2;
-            int y = u.getPixelY() - img.getHeight() / 2;
-
-            g.drawImage(img, x, y, null);
-        }
-    }
-
-    /* =========================
-       SELECTION / QUERY
-       ========================= */
-
-    /**
-     * Get the topmost unit at pixel position (for mouse picking).
-     */
-    public Unit getUnitAtPixel(int x, int y) {
-        for (int i = units.size() - 1; i >= 0; i--) {
-            Unit u = units.get(i);
-            BufferedImage img = u.getImage();
-
-            int px = u.getPixelX() - img.getWidth() / 2;
-            int py = u.getPixelY() - img.getHeight() / 2;
-
-            if (x >= px && x <= px + img.getWidth()
-             && y >= py && y <= py + img.getHeight()) {
-                return u;
-            }
-        }
-        return null;
-    }
-
-    /* =========================
-       DEBUG / UTIL
-       ========================= */
-
-    public void printAllUnits() {
-        for (Unit u : units) {
-            System.out.printf(
-                "Unit UTM: X=%.2f Y=%.2f Z=%.2f%n",
-                u.getUtmX(), u.getUtmY(), u.getUtmZ()
-            );
-        }
-    }
-
-	
-	
     public List<Unit> getFriendlyUnits() {
         List<Unit> result = new ArrayList<>();
         for (Unit u : units) {
-            if (u.getUnitTeam() == UnitTeam.FRIENDLY) {
-                result.add(u);
-            }
+            if (u.getUnitTeam() == UnitTeam.FRIENDLY) result.add(u);
         }
         return result;
     }
@@ -152,16 +53,123 @@ public class UnitManager {
     public List<Unit> getEnemyUnits() {
         List<Unit> result = new ArrayList<>();
         for (Unit u : units) {
-            if (u.getUnitTeam() == UnitTeam.ENEMY) {
-                result.add(u);
-            }
+            if (u.getUnitTeam() == UnitTeam.ENEMY) result.add(u);
         }
         return result;
     }
 
+    /* =========================
+       UPDATE / SIMULATION
+       ========================= */
 
-	public void addUnit(Unit u) {
-		units.add(u);
-		
-	}
+    /** Update pixel positions for all units, alive or destroyed */
+    public void updateRenderPositions() {
+        for (Unit u : units) {
+            try {
+                u.updatePixelPosition(utmToWgs);
+            } catch (Exception e) {
+                // ignore
+            }
+        }
+    }
+
+
+    /* =========================
+       RENDERING
+       ========================= */
+
+    public void draw(Graphics g) {
+        Graphics2D g2 = (Graphics2D) g;
+
+        for (Unit u : units) {
+            BufferedImage img = u.getImage();
+            int x = u.getPixelX() - img.getWidth() / 2;
+            int y = u.getPixelY() - img.getHeight() / 2;
+
+            if (u.getUnitStatus() != UnitStatus.ALIVE) {
+                // Fade image
+                g2.setComposite(AlphaComposite.getInstance(
+                    AlphaComposite.SRC_OVER, 0.3f));
+            } else {
+                g2.setComposite(AlphaComposite.SrcOver);
+            }
+            System.out.println("[DRAW] " + u.getName() + " status=" + u.getUnitStatus());
+
+            g2.drawImage(img, x, y, null);
+
+            // 🔴 IMPORTANT: reset composite BEFORE drawing cross
+            if (u.getUnitStatus() != UnitStatus.ALIVE) {
+                g2.setComposite(AlphaComposite.SrcOver); // <-- THIS LINE
+                g2.setColor(Color.RED);
+                g2.setStroke(new BasicStroke(2f));
+
+                g2.drawLine(x, y, x + img.getWidth(), y + img.getHeight());
+                g2.drawLine(x, y + img.getHeight(), x + img.getWidth(), y);
+            }
+        }
+
+        g2.setComposite(AlphaComposite.SrcOver);
+    }
+
+
+    private void drawUnit(Graphics2D g2, Unit u, float alpha) {
+        g2.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, alpha));
+        BufferedImage img = u.getImage();
+        int x = u.getPixelX() - img.getWidth() / 2;
+        int y = u.getPixelY() - img.getHeight() / 2;
+        g2.drawImage(img, x, y, null);
+    }
+    private void drawDestroyedMark(Graphics2D g2, Unit u) {
+        BufferedImage img = u.getImage();
+        int x = u.getPixelX() - img.getWidth() / 2;
+        int y = u.getPixelY() - img.getHeight() / 2;
+        g2.setColor(Color.RED);
+        g2.drawLine(x, y, x + img.getWidth(), y + img.getHeight());
+        g2.drawLine(x, y + img.getHeight(), x + img.getWidth(), y);
+    }
+
+
+
+
+
+    /* =========================
+       SELECTION / QUERY
+       ========================= */
+
+    public Unit getUnitAtPixel(int x, int y) {
+        for (int i = units.size() - 1; i >= 0; i--) {
+            Unit u = units.get(i);
+            BufferedImage img = u.getImage();
+            int px = u.getPixelX() - img.getWidth() / 2;
+            int py = u.getPixelY() - img.getHeight() / 2;
+
+            if (x >= px && x <= px + img.getWidth() &&
+                y >= py && y <= py + img.getHeight() &&
+                u.getUnitStatus() == UnitStatus.ALIVE) {
+                return u;
+            }
+        }
+        return null;
+    }
+
+    /* =========================
+       LINE OF SIGHT
+       ========================= */
+
+    public boolean hasLOS(Unit a, Unit b) {
+        double dx = b.getUtmX() - a.getUtmX();
+        double dy = b.getUtmY() - a.getUtmY();
+
+        int steps = 100;
+        for (int i = 1; i <= steps; i++) {
+            double t = i / 100.0;
+            double x = a.getUtmX() + dx * t;
+            double y = a.getUtmY() + dy * t;
+            double z = a.getUtmZ() + (b.getUtmZ() - a.getUtmZ()) * t;
+
+            double terrainZ = MapUtils.getElevationAtUTM(dem, x, y);
+            if (terrainZ > z) return false;
+        }
+        return true;
+    }
 }

@@ -5,6 +5,7 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionAdapter;
 
 import javax.swing.JPanel;
+import javax.swing.Timer;
 
 public class CombatSimulator extends JPanel {
 
@@ -14,7 +15,10 @@ public class CombatSimulator extends JPanel {
     private final UnitBootstrap unitBootstrap;
     private final OverlayManager overlayManager;
     private final DetectionManager detectionManager;
+    private final BattleManager battleManager;
+
     private int mouseX = -1, mouseY = -1;
+    private final Timer battleTimer;
 
     public CombatSimulator() throws Exception {
 
@@ -29,6 +33,8 @@ public class CombatSimulator extends JPanel {
         // ---- Overlays ----
         overlayManager = OverlayBootstrap.create(ctx, unitManager);
         detectionManager = new DetectionManager(ctx.dem, ctx.utmToWgs);
+        battleManager = new BattleManager(unitManager, detectionManager);
+
         // ---- Input ----
         new InputController(this, overlayManager);
 
@@ -41,27 +47,42 @@ public class CombatSimulator extends JPanel {
                 repaint();
             }
         });
+
+        // ---- Battle timer: 1 turn per second ----
+        battleTimer = new Timer(1000, e -> {
+            battleManager.runTurn(); // resolve combat first
+            detectionManager.update(
+                    unitManager.getFriendlyUnits(),
+                    unitManager.getEnemyUnits()
+            );
+            repaint();
+        });
     }
 
+    
     @Override
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
 
-        // Base map
         g.drawImage(ctx.map, 0, 0, null);
 
-        // Units
+        // --- Units ---
+        Graphics2D gUnits = (Graphics2D) g.create();
         unitManager.updateRenderPositions();
-        unitManager.draw(g);
-        
+        unitManager.draw(gUnits);
+        gUnits.dispose();
 
-        // Overlays
-        overlayManager.drawOverlays((Graphics2D) g);
-        detectionManager.update(
-                unitManager.getFriendlyUnits(),
-                unitManager.getEnemyUnits()
-            );
-        detectionManager.draw((Graphics2D) g);
+        // --- Overlays ---
+        Graphics2D gOverlays = (Graphics2D) g.create();
+        //overlayManager.drawOverlays(gOverlays);
+        gOverlays.dispose();
+
+        // --- Detection ---
+        Graphics2D gDetect = (Graphics2D) g.create();
+        detectionManager.update(unitManager.getFriendlyUnits(), unitManager.getEnemyUnits());
+        detectionManager.draw(gDetect);
+        gDetect.dispose();
+
         // Mouse UTM display
         if (mouseX >= 0 && mouseY >= 0) {
             try {
@@ -73,26 +94,43 @@ public class CombatSimulator extends JPanel {
 
                 g.setColor(Color.WHITE);
                 g.drawString(
-                        String.format("UTM X %.1f  Y %.1f  Z %.1f m",
-                                utm.x, utm.y, z),
-                        10, 22
+                    String.format("UTM X %.1f  Y %.1f  Z %.1f m",
+                        utm.x, utm.y, z),
+                    10, 22
                 );
             } catch (Exception ignored) {}
         }
     }
+
 
     @Override
     public Dimension getPreferredSize() {
         return new Dimension(ctx.map.getWidth(), ctx.map.getHeight());
     }
 
-    // Expose for menus / UI
+    // ---- Expose for menus / UI ----
     public UnitBootstrap getUnitBootstrap() {
         return unitBootstrap;
     }
 
     public UnitManager getUnitManager() {
         return unitManager;
+    }
+
+    public DetectionManager getDetectionManager() {
+        return detectionManager;
+    }
+
+    public BattleManager getBattleManager() {
+        return battleManager;
+    }
+
+    public void startBattle() {
+        battleTimer.start();
+    }
+
+    public void stopBattle() {
+        battleTimer.stop();
     }
 
     public void toggleLOS() {
@@ -104,5 +142,4 @@ public class CombatSimulator extends JPanel {
         overlayManager.toggle(BitmapOverlay.class);
         repaint();
     }
-
 }
