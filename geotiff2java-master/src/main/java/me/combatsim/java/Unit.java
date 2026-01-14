@@ -16,12 +16,13 @@ public class Unit {
 	private double utmX;
 	private double utmY;
 	private double utmZ;
-
+	private boolean destroyed;
 	// ---- CACHED RENDER POSITION ----
 	private int pixelX;
 	private int pixelY;
 	private boolean isVisible;
-	// private Status status;
+	 
+	private UnitStatus unitStatus=UnitStatus.ALIVE;
 	private double sensorRange;
 	private UnitType unitType;
 	private UnitTeam unitTeam;
@@ -175,6 +176,16 @@ public class Unit {
 	public void setVisible(boolean visible) {
 	    isVisible = visible;
 	}
+	
+	 
+
+	public void setDestroyed(boolean destroyed) {
+	    this.destroyed = destroyed;
+	}
+
+	public WeaponDefinition getWeapon() {
+	    return weapon;
+	}
 
 	 
 	
@@ -192,16 +203,16 @@ public class Unit {
 	}
 	
 	public boolean canDetect(Unit e, ElevationModel dem, MathTransform utmToWgs) {
-	    if (!this.isAlive() || !e.isAlive()) return false;
+	    if (!(this.getUnitStatus()==UnitStatus.ALIVE)) return false;
 
 	    double distance = this.distance2dTo(e); // 2D distance is enough
 	    return distance <= this.sensorRange;
 	}
 
-	private boolean isAlive() {
-		// TODO Auto-generated method stub
-		return true;
+	public UnitStatus isAlive() {
+	    return getUnitStatus();
 	}
+
 
 	/*
 	 * public boolean canDetect(Unit target, ElevationModel dem, MathTransform
@@ -272,10 +283,7 @@ public String getmapSymbol() {
 		return sensorRange;
 	}
 
-	public WeaponDefinition getWeapon() {
-		// TODO Auto-generated method stub
-		return weapon;
-	}
+	 
 
 	public UnitType getUnitType() {
 		// TODO Auto-generated method stub
@@ -285,5 +293,15 @@ public String getmapSymbol() {
 		// TODO Auto-generated method stub
 		return unitRadius;
 	}
+
+	public UnitStatus getUnitStatus() {
+		return unitStatus;
+	}
+
+	public void setUnitStatus(UnitStatus unitStatus) {
+		this.unitStatus = unitStatus;
+	}
+
+	 
 	
 }

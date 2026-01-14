@@ -74,4 +74,9 @@ public class WeaponDefinition {
 	public String getId() {
 		return id;
 	}
+
+	public double getKillProbability() {
+		// TODO Auto-generated method stub
+		return killProbability;
+	}
 }

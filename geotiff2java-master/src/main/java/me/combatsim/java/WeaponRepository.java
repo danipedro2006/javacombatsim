@@ -24,4 +24,6 @@ public class WeaponRepository {
     public static void printAll() {
         weapons.values().forEach(System.out::println);
     }
+
+	
 }

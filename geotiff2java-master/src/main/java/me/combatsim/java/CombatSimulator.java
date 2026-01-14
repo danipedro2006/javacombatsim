@@ -13,7 +13,7 @@ public class CombatSimulator extends JPanel {
     private final UnitFactory unitFactory;
     private final UnitBootstrap unitBootstrap;
     private final OverlayManager overlayManager;
-
+    private final DetectionManager detectionManager;
     private int mouseX = -1, mouseY = -1;
 
     public CombatSimulator() throws Exception {
@@ -28,7 +28,7 @@ public class CombatSimulator extends JPanel {
 
         // ---- Overlays ----
         overlayManager = OverlayBootstrap.create(ctx, unitManager);
-
+        detectionManager = new DetectionManager(ctx.dem, ctx.utmToWgs);
         // ---- Input ----
         new InputController(this, overlayManager);
 
@@ -53,10 +53,15 @@ public class CombatSimulator extends JPanel {
         // Units
         unitManager.updateRenderPositions();
         unitManager.draw(g);
+        
 
         // Overlays
         overlayManager.drawOverlays((Graphics2D) g);
-
+        detectionManager.update(
+                unitManager.getFriendlyUnits(),
+                unitManager.getEnemyUnits()
+            );
+        detectionManager.draw((Graphics2D) g);
         // Mouse UTM display
         if (mouseX >= 0 && mouseY >= 0) {
             try {

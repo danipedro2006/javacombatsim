@@ -50,7 +50,7 @@ public class UnitBootstrap {
             double sensor = Double.parseDouble(p[6].trim());
             double combat = Double.parseDouble(p[7].trim());
             double speed = Double.parseDouble(p[8].trim());
-            WeaponDefinition weapon = WeaponRepository.get(p[9].trim());
+            String weapon = p[9].trim();
             double radius = Double.parseDouble(p[10].trim());
             String symbol = p[11].trim();
 

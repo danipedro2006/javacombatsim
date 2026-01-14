@@ -35,12 +35,14 @@ public class UnitFactory {
             double sensorRange,
             double combatPower,
             double speed,
-            WeaponDefinition weapon,
+            String weaponName,
             double unitRadius,
             String symbol
     ) throws Exception {
 
-        return new Unit(
+        
+    	WeaponDefinition weapon= WeaponRepository.get(weaponName);
+    	return new Unit(
                 name,
                 unitType,
                 unitTeam,

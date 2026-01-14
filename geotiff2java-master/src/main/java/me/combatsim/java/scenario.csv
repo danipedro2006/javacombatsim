@@ -1,4 +1,10 @@
 name,type,team,x,y,visible,sensorRange,combatPower,speed,weapon,radius,symbol
-BRAVO,INFANTRY,ENEMY,800,600,true,5000,10,20,Javelin,20, infantry_blue.bmp
-ALFA,INFANTRY,FRIENDLY,850,650,true,5000,10,20,Javelin,20, infantry.bmp
- 
+201,INFANTRY,ENEMY,810,600,true,5000,10,20,Javelin,20, infantry_blue.bmp
+202,INFANTRY,ENEMY,860,600,true,5000,10,20,Javelin,20, infantry_blue.bmp
+203,INFANTRY,ENEMY,910,600,true,5000,10,20,Javelin,20, infantry_blue.bmp
+204,INFANTRY,ENEMY,950,600,true,5000,10,20,Javelin,20, infantry_blue.bmp
+205,TANK,ENEMY,1000,600,true,5000,10,20,Cannon,20, infantry_blue.bmp
+101,INFANTRY,FRIENDLY,700,650,true,5000,10,20,Javelin,20, infantry.bmp
+101,INFANTRY,FRIENDLY,760,650,true,5000,10,20,Javelin,20, infantry.bmp 
+103,INFANTRY,FRIENDLY,970,650,true,5000,10,20,Javelin,20, infantry.bmp
+104,TANK,FRIENDLY,880,850,true,5000,10,20,Cannon,20, tank.bmp
