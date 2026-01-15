@@ -1,4 +1,4 @@
-package me.combatsim.java;
+package me.combatsim.java.map;
 
 import java.awt.image.BufferedImage;
 

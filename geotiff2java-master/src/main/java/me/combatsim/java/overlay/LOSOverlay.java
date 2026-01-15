@@ -1,4 +1,4 @@
-package me.combatsim.java;
+package me.combatsim.java.overlay;
 
 import java.awt.*;
 import java.awt.geom.Line2D;
@@ -8,6 +8,9 @@ import java.util.List;
 
 import org.geotools.geometry.DirectPosition2D;
 import org.opengis.referencing.operation.MathTransform;
+
+import me.combatsim.java.map.ElevationModel;
+import me.combatsim.java.map.MapUtils;
 
 public class LOSOverlay implements Overlay {
 

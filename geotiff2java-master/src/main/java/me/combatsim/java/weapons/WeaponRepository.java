@@ -1,4 +1,4 @@
-package me.combatsim.java;
+package me.combatsim.java.weapons;
 
 import java.util.*;
 

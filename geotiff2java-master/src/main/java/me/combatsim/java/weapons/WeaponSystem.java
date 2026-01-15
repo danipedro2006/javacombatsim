@@ -1,4 +1,6 @@
-package me.combatsim.java;
+package me.combatsim.java.weapons;
+
+import me.combatsim.java.Unit;
 
 public class WeaponSystem {
 

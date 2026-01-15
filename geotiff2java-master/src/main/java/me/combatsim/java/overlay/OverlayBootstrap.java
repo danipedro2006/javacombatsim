@@ -1,6 +1,9 @@
-package me.combatsim.java;
+package me.combatsim.java.overlay;
 
 import java.util.List;
+
+import me.combatsim.java.UnitManager;
+import me.combatsim.java.map.MapContext;
 
 public class OverlayBootstrap {
 

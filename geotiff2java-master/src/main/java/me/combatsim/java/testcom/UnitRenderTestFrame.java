@@ -1,7 +1,4 @@
-package me.combatsim.java;
-import me.combatsim.java.TestBootstrap;
- 
-
+package me.combatsim.java.testcom;
 import javax.swing.JFrame;
 import javax.swing.SwingUtilities;
 

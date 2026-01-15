@@ -1,4 +1,14 @@
-package me.combatsim.java;
+package me.combatsim.java.testcom;
+
+import me.combatsim.java.Unit;
+import me.combatsim.java.UnitManager;
+import me.combatsim.java.UnitStatus;
+import me.combatsim.java.UnitTeam;
+import me.combatsim.java.UnitType;
+import me.combatsim.java.map.MapContext;
+import me.combatsim.java.weapons.WeaponDefinition;
+import me.combatsim.java.weapons.WeaponLoader;
+import me.combatsim.java.weapons.WeaponRepository;
 
 public class TestBootstrap {
 

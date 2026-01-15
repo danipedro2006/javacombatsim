@@ -1,4 +1,4 @@
-package me.combatsim.java;
+package me.combatsim.java.overlay;
 
 import java.awt.Graphics2D;
 import java.util.ArrayList;
@@ -40,4 +40,13 @@ public class OverlayManager {
             o.setVisible(!o.isVisible());
         }
     }
+    public boolean hasActiveOverlays() {
+        for (Overlay o : overlays) {
+            if (o.isVisible()) {
+                return true;
+            }
+        }
+        return false;
+    }
+
 }

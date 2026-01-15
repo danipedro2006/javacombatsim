@@ -1,7 +1,10 @@
-package me.combatsim.java;
+package me.combatsim.java.testcom;
  
 
 import javax.swing.JPanel;
+
+import me.combatsim.java.UnitManager;
+
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Color;

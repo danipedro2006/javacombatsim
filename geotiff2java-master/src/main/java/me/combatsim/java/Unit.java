@@ -9,6 +9,10 @@ import javax.imageio.ImageIO;
 import org.geotools.geometry.DirectPosition2D;
 import org.opengis.referencing.operation.MathTransform;
 
+import me.combatsim.java.map.ElevationModel;
+import me.combatsim.java.map.MapUtils;
+import me.combatsim.java.weapons.WeaponDefinition;
+
 public class Unit {
 	private String name;
 
@@ -106,6 +110,19 @@ public class Unit {
 		double dy = other.utmY - this.utmY;
 		return Math.sqrt(dx * dx + dy * dy);
 	}
+	
+	public void moveToward(Unit target) {
+	    if (!isAlive()) return;
+	    double meters = speed; // per turn
+	    double dx = target.getUtmX() - utmX;
+	    double dy = target.getUtmY() - utmY;
+	    double len = Math.sqrt(dx*dx + dy*dy);
+	    if (len > 1.0) {
+	        utmX += (dx / len) * meters;
+	        utmY += (dy / len) * meters;
+	    }
+	}
+
 
 	// public boolean hasLOS(Unit a, Unit b) { ... }
 	// public boolean canAtack(Unit a, Unit b) { ... }

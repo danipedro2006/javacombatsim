@@ -2,6 +2,10 @@ package me.combatsim.java;
 
 import org.opengis.referencing.operation.MathTransform;
 
+import me.combatsim.java.map.ElevationModel;
+import me.combatsim.java.weapons.WeaponDefinition;
+import me.combatsim.java.weapons.WeaponRepository;
+
 /**
  * Factory responsible ONLY for constructing Unit objects.
  * All unit parameters are supplied externally (CSV / scenario).

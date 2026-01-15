@@ -1,4 +1,4 @@
-package me.combatsim.java;
+package me.combatsim.java.overlay;
 
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;

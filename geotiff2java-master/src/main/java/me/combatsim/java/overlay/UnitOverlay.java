@@ -1,6 +1,9 @@
-package me.combatsim.java;
+package me.combatsim.java.overlay;
 
 import java.awt.Graphics2D;
+
+import me.combatsim.java.Unit;
+import me.combatsim.java.UnitManager;
 
 public class UnitOverlay implements Overlay {
 

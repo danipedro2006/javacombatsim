@@ -1,4 +1,4 @@
-package me.combatsim.java;
+package me.combatsim.java.map;
 
 import java.awt.geom.Point2D;
 import org.geotools.geometry.DirectPosition2D;

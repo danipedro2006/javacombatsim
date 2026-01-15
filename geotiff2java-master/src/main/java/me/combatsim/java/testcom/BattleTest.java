@@ -1,8 +1,17 @@
-package me.combatsim.java;
+package me.combatsim.java.testcom;
 
 import org.geotools.referencing.CRS;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.opengis.referencing.operation.MathTransform;
+
+import me.combatsim.java.BattleManager;
+import me.combatsim.java.DetectionManager;
+import me.combatsim.java.Unit;
+import me.combatsim.java.UnitBootstrap;
+import me.combatsim.java.UnitFactory;
+import me.combatsim.java.UnitManager;
+import me.combatsim.java.map.MapContext;
+import me.combatsim.java.weapons.WeaponLoader;
 
 import java.util.List;
 

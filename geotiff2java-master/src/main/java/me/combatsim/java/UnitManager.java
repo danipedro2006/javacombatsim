@@ -12,6 +12,9 @@ import java.util.List;
 
 import org.opengis.referencing.operation.MathTransform;
 
+import me.combatsim.java.map.ElevationModel;
+import me.combatsim.java.map.MapUtils;
+
 /**
  * Manages all combat units.
  */

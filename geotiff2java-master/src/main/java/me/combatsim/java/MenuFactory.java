@@ -68,9 +68,11 @@ public class MenuFactory {
 
         JCheckBoxMenuItem ops = new JCheckBoxMenuItem("Operations Overlay");
         ops.addActionListener(e -> app.toggleOperations());
-
+        JCheckBoxMenuItem sensor = new JCheckBoxMenuItem("Sensors Overlay");
+        sensor.addActionListener(e -> app.toggleSensor());
         optionsMenu.add(los);
         optionsMenu.add(ops);
+        optionsMenu.add(sensor);
 
         menuBar.add(optionsMenu);
         return menuBar;

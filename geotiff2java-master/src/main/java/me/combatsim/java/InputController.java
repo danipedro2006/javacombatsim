@@ -3,6 +3,11 @@ package me.combatsim.java;
  
 
 import javax.swing.*;
+
+import me.combatsim.java.overlay.BitmapOverlay;
+import me.combatsim.java.overlay.LOSOverlay;
+import me.combatsim.java.overlay.OverlayManager;
+
 import java.awt.event.*;
 
 public class InputController {

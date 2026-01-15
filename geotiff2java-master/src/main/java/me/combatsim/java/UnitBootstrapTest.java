@@ -6,6 +6,9 @@ import org.geotools.referencing.CRS;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.opengis.referencing.operation.MathTransform;
 
+import me.combatsim.java.map.MapContext;
+import me.combatsim.java.weapons.WeaponLoader;
+
 public class UnitBootstrapTest {
 
     public static void main(String[] args) throws Exception {

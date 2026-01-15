@@ -11,6 +11,8 @@ import java.util.Map;
 
 import org.opengis.referencing.operation.MathTransform;
 
+import me.combatsim.java.map.ElevationModel;
+
 public class DetectionManager {
 
     private final Map<Unit, List<Unit>> detectionMap = new HashMap<>();
