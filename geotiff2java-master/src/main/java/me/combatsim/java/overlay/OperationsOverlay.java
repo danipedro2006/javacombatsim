@@ -5,7 +5,7 @@ import java.util.List;
 import me.combatsim.java.UnitManager;
 import me.combatsim.java.map.MapContext;
 
-public class OverlayBootstrap {
+public class OperationsOverlay {
 
 	public static OverlayManager create(MapContext ctx, UnitManager unitManager) throws Exception {
 

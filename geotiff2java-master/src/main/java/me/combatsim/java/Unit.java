@@ -122,6 +122,13 @@ public class Unit {
 	        utmY += (dy / len) * meters;
 	    }
 	}
+	public void syncUtmFromPixel(MathTransform wgsToUtm, ElevationModel dem) throws Exception {
+	    DirectPosition2D utm = MapUtils.pixelToUTM(pixelX, pixelY, wgsToUtm);
+	    this.utmX = utm.x;
+	    this.utmY = utm.y;
+	    this.utmZ = MapUtils.getElevationAtPixel(dem, pixelX, pixelY);
+	}
+
 
 
 	// public boolean hasLOS(Unit a, Unit b) { ... }
@@ -158,6 +165,11 @@ public class Unit {
     }
 	
 	//----SETTERS----
+	public void setPixelPosition(int x, int y) {
+	    this.pixelX = x;
+	    this.pixelY = y;
+	}
+
 	public void setName(String name) {
 	    this.name = name;
 	}
@@ -314,6 +326,13 @@ public String getmapSymbol() {
 	public boolean isAlive() {
 	    return unitStatus == UnitStatus.ALIVE;
 	}
+
+	public void setUtmPosition(double x, double y, double z) {
+	    this.utmX = x;
+	    this.utmY = y;
+	    this.utmZ = z;
+	}
+
 	 
 	
 }

@@ -33,9 +33,9 @@ public class Main {
 				 
                 frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
                 frame.setJMenuBar(MenuFactory.createMenuBar(sim));
-                frame.add(ToolbarFactory.createToolbar(sim), BorderLayout.NORTH);
+                frame.add(toolbar, BorderLayout.NORTH);
                 frame.add(sim, BorderLayout.CENTER);
-                frame.setContentPane(sim);
+                //frame.setContentPane(sim);
                 frame.pack();
                 frame.setLocationRelativeTo(null);
                 frame.setVisible(true);
@@ -46,4 +46,4 @@ public class Main {
         });
     }
 }
- 
+  

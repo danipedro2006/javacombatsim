@@ -1,10 +1,10 @@
-name,type,team,x,y,visible,sensorRange,combatPower,speed,weapon,radius,symbol
-201,INFANTRY,ENEMY,810,650,true,5000,10,20,Javelin,20, infantry_blue.bmp
-202,INFANTRY,ENEMY,860,700,true,5000,10,20,Javelin,20, infantry_blue.bmp
-203,INFANTRY,ENEMY,910,800,true,5000,10,20,Javelin,20, infantry_blue.bmp
-204,INFANTRY,ENEMY,950,850,true,5000,10,20,Javelin,20, infantry_blue.bmp
-205,TANK,ENEMY,1000,600,true,5000,10,20,Cannon,20, infantry_blue.bmp
-101,INFANTRY,FRIENDLY,700,600,true,5000,10,20,Javelin,20, infantry.bmp
-101,INFANTRY,FRIENDLY,760,700,true,5000,10,20,Javelin,20, infantry.bmp 
-103,INFANTRY,FRIENDLY,800,800,true,5000,10,20,Javelin,20, infantry.bmp
-104,TANK,FRIENDLY,880,850,true,5000,10,20,Cannon,20, tank.bmp
+NAME,TYPE,TEAM,X,Y,VISIBLE,SENSRANGE,COMBATPOWER,SPEED,WEAPON,RADIUS,SYMBOL,
+201,INFANTRY,ENEMY,810,650,TRUE,5000,10,20,Javelin,20, infantry_blue.bmp,
+202,INFANTRY,ENEMY,860,700,TRUE,5000,10,20,Javelin,20, infantry_blue.bmp,
+203,INFANTRY,ENEMY,910,800,TRUE,5000,10,20,Javelin,20, infantry_blue.bmp,
+204,INFANTRY,ENEMY,950,850,TRUE,5000,10,20,Javelin,20, infantry_blue.bmp,
+205,TANK,ENEMY,1000,600,TRUE,5000,10,20,Cannon,20, infantry_blue.bmp,
+101,INFANTRY,FRIENDLY,700,600,TRUE,5000,10,20,Javelin,20, infantry.bmp,
+101,INFANTRY,FRIENDLY,760,700,TRUE,5000,10,20,Javelin,20, infantry.bmp ,
+103,INFANTRY,FRIENDLY,800,800,TRUE,5000,10,20,Javelin,20, infantry.bmp,
+104,TANK,FRIENDLY,880,850,TRUE,5000,10,20,Cannon,20, tank.bmp,

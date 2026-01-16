@@ -44,11 +44,14 @@ public class MenuFactory {
         toolsMenu.add(stepBattle);
         
         startBattle.addActionListener((ActionEvent e) -> {
+        	app.setSimMode(SimMode.BATTLE);
             app.startBattle();
+             
         });
 
         stopBattle.addActionListener((ActionEvent e) -> {
-            app.stopBattle();
+        	app.stopBattle();
+            app.setSimMode(SimMode.EDIT);
         });
 
         stepBattle.addActionListener((ActionEvent e) -> {
