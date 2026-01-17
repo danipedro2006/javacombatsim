@@ -5,6 +5,7 @@ import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
+import java.awt.geom.Point2D;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -85,6 +86,7 @@ public class UnitManager {
         Graphics2D g2 = (Graphics2D) g;
 
         for (Unit u : units) {
+        	drawPlannedMoveArrow(g2, u);
             BufferedImage img = u.getImage();
             int x = u.getPixelX() - img.getWidth() / 2;
             int y = u.getPixelY() - img.getHeight() / 2;
@@ -115,13 +117,7 @@ public class UnitManager {
     }
 
 
-    private void drawUnit(Graphics2D g2, Unit u, float alpha) {
-        g2.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, alpha));
-        BufferedImage img = u.getImage();
-        int x = u.getPixelX() - img.getWidth() / 2;
-        int y = u.getPixelY() - img.getHeight() / 2;
-        g2.drawImage(img, x, y, null);
-    }
+   
     private void drawDestroyedMark(Graphics2D g2, Unit u) {
         BufferedImage img = u.getImage();
         int x = u.getPixelX() - img.getWidth() / 2;
@@ -175,4 +171,48 @@ public class UnitManager {
         }
         return true;
     }
+    private void drawPlannedMoveArrow(Graphics2D g2, Unit u) {
+        if (!u.hasPlannedMove()) return;
+
+        try {
+            Point2D from = new Point2D.Double(u.getPixelX(), u.getPixelY());
+            Point2D to = MapUtils.utmToPixel(
+                u.getPlannedUtmX(),
+                u.getPlannedUtmY(),
+                utmToWgs
+            );
+
+            g2.setColor(Color.BLACK);
+            g2.setStroke(new BasicStroke(2f));
+
+            // Draw line
+            g2.drawLine(
+                (int) from.getX(), (int) from.getY(),
+                (int) to.getX(),   (int) to.getY()
+            );
+
+            // Draw arrowhead
+            drawArrowHead(g2, from, to);
+
+        } catch (Exception ignored) {}
+        
+        
+    }
+    private void drawArrowHead(Graphics2D g2, Point2D from, Point2D to) {
+        double phi = Math.toRadians(20);
+        int barb = 10;
+
+        double dx = to.getX() - from.getX();
+        double dy = to.getY() - from.getY();
+        double theta = Math.atan2(dy, dx);
+
+        double x = to.getX() - barb * Math.cos(theta + phi);
+        double y = to.getY() - barb * Math.sin(theta + phi);
+        g2.drawLine((int) to.getX(), (int) to.getY(), (int) x, (int) y);
+
+        x = to.getX() - barb * Math.cos(theta - phi);
+        y = to.getY() - barb * Math.sin(theta - phi);
+        g2.drawLine((int) to.getX(), (int) to.getY(), (int) x, (int) y);
+    }
+
 }

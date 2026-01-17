@@ -38,38 +38,41 @@ public class BattleManager {
 
   /** Resolve combat for a single unit */
   private void resolveCombatForUnit(Unit attacker) {
-    if (attacker.getUnitStatus() != UnitStatus.ALIVE) return;
+	    if (attacker.getUnitStatus() != UnitStatus.ALIVE) return;
 
-    List < Unit > detectedTargets = detectionManager.getDetectedUnits(attacker);
-    if (detectedTargets == null || detectedTargets.isEmpty()) return;
+	    // 🔹 APPLY PLANNED MOVE FIRST
+	    if (attacker.hasPlannedMove()) {
+	        attacker.moveTowardPlannedTarget();
+	    }
 
-    // Find closest alive target
-    Unit closestTarget = null;
-    double closestDistance = Double.MAX_VALUE;
-    for (Unit target: detectedTargets) {
-      if (target.getUnitStatus() != UnitStatus.ALIVE) continue;
+	    List<Unit> detectedTargets = detectionManager.getDetectedUnits(attacker);
+	    if (detectedTargets == null || detectedTargets.isEmpty()) return;
 
-      double dist = attacker.distance2dTo(target);
-      if (dist < closestDistance) {
-        closestDistance = dist;
-        closestTarget = target;
-      }
-    }
+	    Unit closestTarget = null;
+	    double closestDistance = Double.MAX_VALUE;
 
-    if (closestTarget != null) {
+	    for (Unit target : detectedTargets) {
+	        if (target.getUnitStatus() != UnitStatus.ALIVE) continue;
 
-      WeaponDefinition weapon = attacker.getWeapon();
-      double distance = attacker.distance2dTo(closestTarget);
+	        double dist = attacker.distance2dTo(target);
+	        if (dist < closestDistance) {
+	            closestDistance = dist;
+	            closestTarget = target;
+	        }
+	    }
 
-      // 🔹 MOVE if target is out of range
-      if (weapon != null && distance > weapon.getMaxRange()) {
-        attacker.moveToward(closestTarget);
-      }
+	    if (closestTarget != null) {
+	        WeaponDefinition weapon = attacker.getWeapon();
+	        double distance = attacker.distance2dTo(closestTarget);
 
-      // 🔹 ATTACK (existing logic)
-      attack(attacker, closestTarget);
-    }
-  }
+	        if (weapon != null && distance > weapon.getMaxRange()) {
+	            attacker.moveToward(closestTarget);
+	        }
+
+	        attack(attacker, closestTarget);
+	    }
+	}
+
 
   /** Simple combat resolution */
   private void attack(Unit attacker, Unit target) {

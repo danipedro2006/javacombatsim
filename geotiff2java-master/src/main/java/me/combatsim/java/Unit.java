@@ -15,12 +15,14 @@ import me.combatsim.java.weapons.WeaponDefinition;
 
 public class Unit {
 	private String name;
-
+	 
+	private boolean hasPlannedMove = false;
 	// ---- TRUE POSITION (UTM) ----
 	private double utmX;
 	private double utmY;
 	private double utmZ;
-	 
+	private Double plannedUtmX = null;
+	private Double plannedUtmY = null;
 	// ---- CACHED RENDER POSITION ----
 	private int pixelX;
 	private int pixelY;
@@ -127,6 +129,23 @@ public class Unit {
 	    this.utmX = utm.x;
 	    this.utmY = utm.y;
 	    this.utmZ = MapUtils.getElevationAtPixel(dem, pixelX, pixelY);
+	}
+	
+	public void moveTowardPlannedTarget() {
+	    if (!hasPlannedMove) return;
+
+	    double dx = plannedUtmX - utmX;
+	    double dy = plannedUtmY - utmY;
+	    double distance = Math.sqrt(dx*dx + dy*dy);
+
+	    if (distance == 0) {
+	        clearPlannedMove(); // <-- use safe method
+	        return;
+	    }
+
+	    double step = Math.min(speed, distance); // move by speed or remaining distance
+	    utmX += dx / distance * step;
+	    utmY += dy / distance * step;
 	}
 
 
@@ -330,9 +349,30 @@ public String getmapSymbol() {
 	public void setUtmPosition(double x, double y, double z) {
 	    this.utmX = x;
 	    this.utmY = y;
-	    this.utmZ = z;
+	    this.utmZ = z; 
+	}
+ 
+	 
+
+	public void setPlannedTarget(double x, double y) {
+	    plannedUtmX = x;
+	    plannedUtmY = y;
+	    hasPlannedMove = true;
 	}
 
-	 
+	public void clearPlannedMove() {
+	    plannedUtmX = null;
+	    plannedUtmY = null;
+	    hasPlannedMove = false; // fixed
+	}
+
+	public boolean hasPlannedMove() {
+	    return hasPlannedMove;
+	}
+
+	public Double getPlannedUtmX() { return plannedUtmX; }
+	public Double getPlannedUtmY() { return plannedUtmY; }
+
 	
 }
+ 

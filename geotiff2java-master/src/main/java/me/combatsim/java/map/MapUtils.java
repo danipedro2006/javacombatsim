@@ -90,5 +90,16 @@ public final class MapUtils {
         Point2D px = wgs84ToPixel(wgs.y, wgs.x); // returns Point2D
         return new Point2D.Double(px.getX(), px.getY()); // wrap as Point2D.Double
     }
+    public static DirectPosition2D utmToWgs(
+            double utmX,
+            double utmY,
+            MathTransform utmToWgs
+    ) throws Exception {
 
+        DirectPosition2D utm = new DirectPosition2D(utmX, utmY);
+        DirectPosition2D wgs = new DirectPosition2D();
+
+        utmToWgs.transform(utm, wgs);
+        return wgs;
+    }
 }
