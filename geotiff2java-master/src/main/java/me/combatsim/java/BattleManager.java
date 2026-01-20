@@ -86,7 +86,8 @@ public class BattleManager {
     if (distance > weapon.getMaxRange()) return;
 
     double hitChance = weapon.getKillProbability();
-    hitChance = Math.max(0.05, Math.min(0.95, hitChance));
+    //hitChance = Math.max(0.05, Math.min(0.95, hitChance));
+    hitChance=attacker.getWeapon().getKillProbability();
 
     // Attack
     boolean destroyed = rand.nextDouble() < hitChance;
