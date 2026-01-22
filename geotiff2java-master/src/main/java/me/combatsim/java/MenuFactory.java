@@ -1,83 +1,87 @@
 package me.combatsim.java;
 
- 
-
 import java.awt.event.ActionEvent;
-
 import javax.swing.*;
+
+import me.combatsim.java.overlay.OverlayEditorPanel;
 
 public class MenuFactory {
 
-    public static JMenuBar createMenuBar(CombatSimulator app) {
-
+    public static JMenuBar createMenuBar(
+            CombatSimulator combatSimulator,
+            OverlayEditorPanel editorPanel // <-- pass the editor panel here
+    ) {
         JMenuBar menuBar = new JMenuBar();
         JMenu fileMenu = new JMenu("File");
-        JMenu toolsMenu=new JMenu("Tools");
+        JMenu toolsMenu = new JMenu("Tools");
         JMenu optionsMenu = new JMenu("Options");
-        
+
         JMenuItem exitItem = new JMenuItem("Exit");
         JMenuItem saveItem = new JMenuItem("Save scenario");
         JMenuItem loadItem = new JMenuItem("Load scenario");
         JMenuItem newItem = new JMenuItem("New");
-        
+
         menuBar.add(fileMenu);
         menuBar.add(toolsMenu);
         menuBar.add(optionsMenu);
-        
+
         fileMenu.add(newItem);
         fileMenu.add(loadItem);
         fileMenu.add(saveItem);
         fileMenu.add(exitItem);
-        
-        JMenuItem testItem=new JMenuItem("Test");
-		toolsMenu.add(testItem);
-		
+
         JCheckBoxMenuItem los = new JCheckBoxMenuItem("LOS");
-         
+        los.addActionListener(e -> combatSimulator.toggleLOS());
+
+        JCheckBoxMenuItem opsOverlay = new JCheckBoxMenuItem("Operations Overlay");
+        opsOverlay.addActionListener(e -> combatSimulator.toggleOperations());
+
+        JCheckBoxMenuItem sensorOverlay = new JCheckBoxMenuItem("Sensors Overlay");
+        sensorOverlay.addActionListener(e -> combatSimulator.toggleSensor());
+
+        // ---- NEW: Overlay Editor toggle ----
+        JCheckBoxMenuItem overlayEditorToggle = new JCheckBoxMenuItem("Overlay Editor");
+        overlayEditorToggle.addActionListener((ActionEvent e) -> {
+            boolean visible = overlayEditorToggle.isSelected();
+            editorPanel.setVisible(visible); // toggle overlay editor visibility
+            editorPanel.repaint();
+        });
+
+        optionsMenu.add(los);
+        optionsMenu.add(opsOverlay);
+        optionsMenu.add(sensorOverlay);
+        optionsMenu.addSeparator();
+        optionsMenu.add(overlayEditorToggle);
+
+        // ---- Battle controls ----
         JMenuItem startBattle = new JMenuItem("Start Battle");
         JMenuItem stopBattle = new JMenuItem("Stop Battle");
         JMenuItem stepBattle = new JMenuItem("Step Battle");
-        
+
         toolsMenu.add(startBattle);
         toolsMenu.add(stopBattle);
         toolsMenu.addSeparator();
         toolsMenu.add(stepBattle);
-        
+
         startBattle.addActionListener((ActionEvent e) -> {
-        	app.setSimMode(SimMode.BATTLE);
-            app.startBattle();
-             
+            combatSimulator.setSimMode(SimMode.BATTLE);
+            combatSimulator.startBattle();
         });
 
         stopBattle.addActionListener((ActionEvent e) -> {
-        	app.stopBattle();
-            app.setSimMode(SimMode.EDIT);
+            combatSimulator.stopBattle();
+            combatSimulator.setSimMode(SimMode.EDIT);
         });
 
         stepBattle.addActionListener((ActionEvent e) -> {
-            app.getDetectionManager().update(
-                app.getUnitManager().getFriendlyUnits(),
-                app.getUnitManager().getEnemyUnits()
+            combatSimulator.getDetectionManager().update(
+                    combatSimulator.getUnitManager().getFriendlyUnits(),
+                    combatSimulator.getUnitManager().getEnemyUnits()
             );
-            app.getBattleManager().runTurn();
-            app.repaint();
+            combatSimulator.getBattleManager().runTurn();
+            combatSimulator.repaint();
         });
 
-
-        
-
-        menuBar.add(toolsMenu);
-        los.addActionListener(e -> app.toggleLOS());
-
-        JCheckBoxMenuItem ops = new JCheckBoxMenuItem("Operations Overlay");
-        ops.addActionListener(e -> app.toggleOperations());
-        JCheckBoxMenuItem sensor = new JCheckBoxMenuItem("Sensors Overlay");
-        sensor.addActionListener(e -> app.toggleSensor());
-        optionsMenu.add(los);
-        optionsMenu.add(ops);
-        optionsMenu.add(sensor);
-
-        menuBar.add(optionsMenu);
         return menuBar;
     }
 }

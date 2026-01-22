@@ -5,6 +5,7 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionAdapter;
 
 import javax.swing.JPanel;
+import javax.swing.JToolBar;
 import javax.swing.Timer;
 
 import org.opengis.referencing.operation.MathTransform;
@@ -14,7 +15,9 @@ import me.combatsim.java.map.MapContext;
 import me.combatsim.java.map.MapUtils;
 import me.combatsim.java.overlay.BitmapOverlay;
 import me.combatsim.java.overlay.LOSOverlay;
-import me.combatsim.java.overlay.OperationsOverlay;
+import me.combatsim.java.overlay.Overlays;
+import me.combatsim.java.overlay.OverlayEditorOverlay;
+import me.combatsim.java.overlay.OverlayEditorPanel;
 import me.combatsim.java.overlay.OverlayManager;
 
 public class CombatSimulator extends JPanel {
@@ -39,9 +42,12 @@ public class CombatSimulator extends JPanel {
     unitManager = new UnitManager(ctx.utmToWgs, ctx.dem);
     unitFactory = new UnitFactory(ctx.dem, ctx.wgsToUtm, ctx.utmToWgs);
     unitBootstrap = new UnitBootstrap(unitFactory, unitManager);
+    OverlayEditorPanel editorPanel = new OverlayEditorPanel("operations.bmp");
 
+    //JToolBar toolbar = ToolbarFactory.createOverlayEditorToolbar(editorPanel.getCore());
+    	
     // ---- Overlays ----
-    overlayManager = OperationsOverlay.create(ctx, unitManager);
+    overlayManager = Overlays.create(ctx, unitManager);
     detectionManager = new DetectionManager(ctx.dem, ctx.utmToWgs);
     battleManager = new BattleManager(unitManager, detectionManager);
 
@@ -170,5 +176,11 @@ public class CombatSimulator extends JPanel {
   public ElevationModel getDem() {
     return ctx.dem;
   }
+
+public OverlayManager getOverlayManager() {
+	 
+	return overlayManager;
+}
+
 
 }

@@ -49,4 +49,9 @@ public class OverlayManager {
         return false;
     }
 
+	public void save() {
+		// TODO Auto-generated method stub
+		
+	}
+
 }
