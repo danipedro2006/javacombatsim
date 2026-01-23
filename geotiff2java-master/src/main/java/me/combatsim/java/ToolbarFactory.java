@@ -49,7 +49,13 @@ public class ToolbarFactory {
         crossedCircleBtn.addActionListener(e -> core.setTool(Tool.CROSSED_CIRCLE));
 
         // ---- Save button now updates operations.bmp via OverlayEditorPanel ----
-        saveBtn.addActionListener(e -> editorPanel.saveOverlay());
+        saveBtn.addActionListener(e -> {
+            try {
+                editorPanel.saveOverlay();
+            } catch (Exception ex) {
+                ex.printStackTrace();
+            }
+        });
 
         // ---- Add buttons to toolbar ----
         toolbar.add(saveBtn);

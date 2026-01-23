@@ -26,9 +26,9 @@ public class OverlayEditorCore {
         } else {
             canvas = new BufferedImage(800, 600, BufferedImage.TYPE_INT_ARGB);
         }
-        currentFile = new File("operations.bmp");
+        // Make currentFile point to the same path as the file you loaded
+        currentFile = f;
     }
-
 
     
 

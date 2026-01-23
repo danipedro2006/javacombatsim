@@ -25,7 +25,6 @@ public class OverlayEditorPanel extends JPanel {
             @Override
             public void mouseDragged(MouseEvent e) { core.mouseDragged(e.getPoint()); repaint(); }
         });
-        
     }
 
     @Override
@@ -54,5 +53,12 @@ public class OverlayEditorPanel extends JPanel {
                 "Save Error",
                 JOptionPane.ERROR_MESSAGE);
         }
+    }
+
+    /**
+     * Set current drawing tool (called from toolbar buttons)
+     */
+    public void setTool(Tool tool) {
+        core.setTool(tool);
     }
 }
