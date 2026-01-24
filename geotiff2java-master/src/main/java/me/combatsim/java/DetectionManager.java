@@ -1,21 +1,18 @@
 package me.combatsim.java;
 
-import java.awt.AlphaComposite;
-import java.awt.BasicStroke;
-import java.awt.Color;
-import java.awt.Graphics2D;
-import java.util.ArrayList;
-import java.util.HashMap;
+import java.awt.*;
+import java.util.*;
 import java.util.List;
-import java.util.Map;
-
 import org.opengis.referencing.operation.MathTransform;
-
 import me.combatsim.java.map.ElevationModel;
 
 public class DetectionManager {
 
-    private final Map<Unit, List<Unit>> detectionMap = new HashMap<>();
+    // Structure: Observer -> (Target -> DetectionScore 0-100)
+    private final Map<Unit, Map<Unit, Double>> continuousDetectionMap = new HashMap<>();
+    // This maintains your original API for the rest of the app
+    private final Map<Unit, List<Unit>> publicDetectionMap = new HashMap<>();
+    
     private final ElevationModel dem;
     private final MathTransform utmToWgs;
 
@@ -24,46 +21,80 @@ public class DetectionManager {
         this.utmToWgs = utmToWgs;
     }
 
-    /** Update detection map for given friendly and enemy units */
     public void update(List<Unit> friendlyUnits, List<Unit> enemyUnits) {
-        detectionMap.clear();
+        // We update the probability for both sides
+        processSide(friendlyUnits, enemyUnits);
+        processSide(enemyUnits, friendlyUnits);
+        
+        // Update the public list of "actually detected" units (score > 50)
+        refreshPublicMap();
+    }
 
-        for (Unit u : friendlyUnits) {
-            List<Unit> detected = new ArrayList<Unit>();
-            for (Unit e : enemyUnits) {
-                if (u.canDetect(e, dem, utmToWgs)) {
-                    detected.add(e);
-                }
-            }
-            detectionMap.put(u, detected);
-        }
+    private void processSide(List<Unit> observers, List<Unit> targets) {
+        for (Unit u : observers) {
+            if (u.getUnitStatus() != UnitStatus.ALIVE) continue;
 
-        for (Unit e : enemyUnits) {
-            List<Unit> detected = new ArrayList<Unit>();
-            for (Unit u : friendlyUnits) {
-                if (e.canDetect(u, dem, utmToWgs)) {
-                    detected.add(u);
+            Map<Unit, Double> scores = continuousDetectionMap.computeIfAbsent(u, k -> new HashMap<>());
+
+            for (Unit e : targets) {
+                double distance = u.distance2dTo(e);
+                double currentScore = scores.getOrDefault(e, 0.0);
+
+                // 1. Physical check (Hard limits)
+                if (distance <= u.getSensorRange() && u.hasLOS(e, u, dem, utmToWgs)) {
+                    
+                    // 2. Power Law Probability Formula: P = (1 - d/d_max)^k
+                    // k=2 is standard. Lower k (e.g. 1.5) makes spotting easier at distance.
+                    double pBase = Math.pow(1.0 - (distance / u.getSensorRange()), 2.0);
+                    
+                    // 3. Apply Target Radius (Scale)
+                    // A bigger radius increases the chance of a "successful glance"
+                    double finalProb = pBase * (e.getunitRadius() * 1.5); 
+
+                    // 4. The Roll
+                    if (Math.random() < finalProb) {
+                        // Spotted something! Increase score based on size
+                        currentScore += (10.0 * e.getunitRadius());
+                    } else {
+                        // Glance failed, slow decay
+                        currentScore -= 0.5;
+                    }
+                } else {
+                    // No LOS or Out of Range: Detection fades away
+                    currentScore -= 2.0; 
                 }
+
+                scores.put(e, Math.max(0, Math.min(100, currentScore)));
             }
-            detectionMap.put(e, detected);
         }
     }
 
-    /** Get units detected by u */
+    private void refreshPublicMap() {
+        publicDetectionMap.clear();
+        for (var entry : continuousDetectionMap.entrySet()) {
+            List<Unit> spotted = new ArrayList<>();
+            for (var targetEntry : entry.getValue().entrySet()) {
+                if (targetEntry.getValue() >= 50.0) { // Detection Threshold
+                    spotted.add(targetEntry.getKey());
+                }
+            }
+            publicDetectionMap.put(entry.getKey(), spotted);
+        }
+    }
+
     public List<Unit> getDetectedUnits(Unit u) {
-        return detectionMap.getOrDefault(u, new ArrayList<Unit>());
+        return publicDetectionMap.getOrDefault(u, Collections.emptyList());
     }
 
-    /** Draw detection info (optional) */
     public void draw(Graphics2D g) {
-    	g.setComposite(AlphaComposite.SrcOver);
-    	g.setStroke(new BasicStroke(1f));
-    	g.setColor(Color.BLACK);
-        // Example: highlight detected units
-        g.setColor(new java.awt.Color(255, 0, 0, 128));
-        for (Map.Entry<Unit, List<Unit>> entry : detectionMap.entrySet()) {
+        g.setStroke(new BasicStroke(1f));
+        for (var entry : publicDetectionMap.entrySet()) {
             Unit u = entry.getKey();
             for (Unit target : entry.getValue()) {
+                // Feature: Line transparency based on detection score
+                double score = continuousDetectionMap.get(u).get(target);
+                int alpha = (int) (score * 2.55); // Map 0-100 to 0-255
+                g.setColor(new Color(255, 0, 0, alpha));
                 g.drawLine(u.getPixelX(), u.getPixelY(), target.getPixelX(), target.getPixelY());
             }
         }

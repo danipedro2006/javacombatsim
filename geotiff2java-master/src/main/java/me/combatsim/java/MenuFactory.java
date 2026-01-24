@@ -1,6 +1,9 @@
 package me.combatsim.java;
 
 import java.awt.event.ActionEvent;
+import java.io.File;
+import java.io.IOException;
+
 import javax.swing.*;
 
 import me.combatsim.java.overlay.OverlayEditorPanel;
@@ -18,7 +21,8 @@ public class MenuFactory {
 
         JMenuItem exitItem = new JMenuItem("Exit");
         JMenuItem saveItem = new JMenuItem("Save scenario");
-        JMenuItem loadItem = new JMenuItem("Load scenario");
+        JMenuItem saveStateItem = new JMenuItem("Save state");
+        JMenuItem loadStateItem = new JMenuItem("Load state");
         JMenuItem newItem = new JMenuItem("New");
 
         menuBar.add(fileMenu);
@@ -26,8 +30,9 @@ public class MenuFactory {
         menuBar.add(optionsMenu);
 
         fileMenu.add(newItem);
-        fileMenu.add(loadItem);
+        fileMenu.add(loadStateItem);
         fileMenu.add(saveItem);
+        fileMenu.add(saveStateItem);
         fileMenu.add(exitItem);
 
         JCheckBoxMenuItem los = new JCheckBoxMenuItem("LOS");
@@ -80,6 +85,24 @@ public class MenuFactory {
             );
             combatSimulator.getBattleManager().runTurn();
             combatSimulator.repaint();
+        });
+        
+        saveStateItem.addActionListener((ActionEvent e) -> {
+        	try {
+				SimulationStateIO.save("C:/Users/danie/Downloads/geotiff2java-master/geotiff2java-master/src/main/resources/state.csv",combatSimulator.getUnitManager());
+			} catch (IOException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
+        });
+        loadStateItem.addActionListener((ActionEvent e) -> {
+        	try {
+				SimulationStateIO.load("C:/Users/danie/Downloads/geotiff2java-master/geotiff2java-master/src/main/resources/state.csv",combatSimulator.getUnitManager());
+				combatSimulator.repaint();
+        	} catch (IOException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
         });
 
         return menuBar;

@@ -32,6 +32,8 @@ public class CombatSimulator extends JPanel {
   private SimMode simMode = SimMode.EDIT;
   private int mouseX = -1, mouseY = -1;
   private final Timer battleTimer;
+  private final MOECollector moeCollector;
+  private int turn = 0;
 
   public CombatSimulator() throws Exception {
 
@@ -50,7 +52,7 @@ public class CombatSimulator extends JPanel {
     overlayManager = Overlays.create(ctx, unitManager);
     detectionManager = new DetectionManager(ctx.dem, ctx.utmToWgs);
     battleManager = new BattleManager(unitManager, detectionManager);
-
+    this.moeCollector = new MOECollector();
     // ---- Input ----
     new InputController(this, overlayManager);
 
@@ -73,6 +75,7 @@ public class CombatSimulator extends JPanel {
       detectionManager.update(unitManager.getFriendlyUnits(), unitManager.getEnemyUnits());
       repaint();
     });
+	
   }
 
   @Override
@@ -181,6 +184,8 @@ public OverlayManager getOverlayManager() {
 	 
 	return overlayManager;
 }
+
+
 
 
 }

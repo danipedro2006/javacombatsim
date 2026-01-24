@@ -232,13 +232,53 @@ public class Unit {
 
 	}
 
-	public boolean canDetect(Unit e, ElevationModel dem, MathTransform utmToWgs) {
-		if (!(this.getUnitStatus() == UnitStatus.ALIVE))
-			return false;
+	/*
+	 * public boolean canDetect(Unit e, ElevationModel dem, MathTransform utmToWgs)
+	 * { if (!(this.getUnitStatus() == UnitStatus.ALIVE)) return false;
+	 * 
+	 * 
+	 * double distance = this.distance2dTo(e); // 2D distance is enough //return
+	 * distance <= this.sensorRange; return (distance <= this.sensorRange &&
+	 * hasLOS(this, e, dem, utmToWgs));//changed }
+	 */
+	/*
+	 * public boolean canDetect(Unit e, ElevationModel dem, MathTransform utmToWgs)
+	 * { // 1. Verificări de bază (Hard stops) if (this.getUnitStatus() !=
+	 * UnitStatus.ALIVE) return false;
+	 * 
+	 * double distance = this.distance2dTo(e); if (distance > this.sensorRange)
+	 * return false;
+	 * 
+	 * // 2. Line of Sight (Cea mai costisitoare operație, o facem după distanță) if
+	 * (!hasLOS(this, e, dem, utmToWgs)) { // Dacă pierdem LOS, scădem rapid scorul
+	 * de detecție (opțional) e.setDetectionScore(this, Math.max(0,
+	 * e.getDetectionScore(this) - 10)); return false; }
+	 * 
+	 * // 3. Power Law Formula // k = 2.0 pentru condiții normale, k = 4.0 pentru
+	 * condiții grele (ceață/tufișuri) double k = 2.0; double pBase = Math.pow(1.0 -
+	 * (distance / this.sensorRange), k);
+	 * 
+	 * // 4. Modificatori de context (Hacks) //if (e.isMoving()) pBase *= 2.0; //
+	 * Mișcarea dublează șansa de a fi observat //if (e.isFiring()) pBase *= 5.0; //
+	 * Tragerea cu arma face detecția aproape instantanee
+	 * 
+	 * // 5. Simulare eveniment random (The "Roll") if (Math.random() < pBase) { //
+	 * Nu "vedem" instant, ci creștem un buffer double currentScore =
+	 * e.getDetectionScore(this); e.setDetectionScore(this, Math.min(100,
+	 * currentScore + 20)); }
+	 * 
+	 * // 6. Rezultatul depinde de pragul de acumulare // Unitatea este considerată
+	 * detectată doar dacă scorul a trecut de 50 return e.getDetectionScore(this) >=
+	 * 50; }
+	 */
+	private void setDetectionScore(Unit unit, double d) {
+		// TODO Auto-generated method stub
+		
+	}
 
-		double distance = this.distance2dTo(e); // 2D distance is enough
-		//return distance <= this.sensorRange; 
-		return (distance <= this.sensorRange && hasLOS(this, e, dem, utmToWgs));//changed
+	private int getDetectionScore(Unit unit) {
+		// TODO Auto-generated method stub
+		return 0;
 	}
 
 	/*
@@ -329,10 +369,10 @@ public class Unit {
 		return unitStatus == UnitStatus.ALIVE;
 	}
 
-	public void setUtmPosition(double x, double y, double z) {
+	public void setUtmPosition(double x, double y) {
 		this.utmX = x;
 		this.utmY = y;
-		this.utmZ = z;
+		
 	}
 
 	public void setPlannedTarget(double x, double y) {
