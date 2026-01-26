@@ -1,5 +1,6 @@
 package me.combatsim.java;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
@@ -10,6 +11,9 @@ public class BattleManager {
   private final UnitManager unitManager;
   private final DetectionManager detectionManager;
   private final Random rand = new Random();
+  private final List<Unit> unitsDestroyedThisTurn = new ArrayList<>();
+  private int friendlyAttacksThisTurn = 0;
+  private int enemyAttacksThisTurn = 0;
 
   public BattleManager(UnitManager unitManager, DetectionManager detectionManager) {
     this.unitManager = unitManager;
@@ -18,6 +22,9 @@ public class BattleManager {
 
   /** Run one combat turn */
   public void runTurn() {
+	  unitsDestroyedThisTurn.clear();
+	    friendlyAttacksThisTurn = 0;
+	    enemyAttacksThisTurn = 0;
 
     // Update detection first (use current units in UnitManager)
     detectionManager.update(
@@ -68,7 +75,12 @@ public class BattleManager {
 	        if (weapon != null && distance > weapon.getMaxRange()) {
 	            attacker.moveToward(closestTarget);
 	        }
-
+	     // Count attacks
+	        if (attacker.getUnitTeam() == UnitTeam.FRIENDLY) {
+	            friendlyAttacksThisTurn++;
+	        } else {
+	            enemyAttacksThisTurn++;
+	        }
 	        attack(attacker, closestTarget);
 	    }
 	}
@@ -94,6 +106,7 @@ public class BattleManager {
     if (destroyed) {
       // Update the *same instance* of the unit in UnitManager
       target.setUnitStatus(UnitStatus.DESTROYED);
+      unitsDestroyedThisTurn.add(target);
       /*
        * System.out.println("[COMBAT] " + attacker.getName() + " destroyed " +
        * target.getName());
@@ -119,5 +132,17 @@ public class BattleManager {
     }
     return best;
   }
+
+  public Unit[] getUnitsDestroyedThisTurn() {
+	    return unitsDestroyedThisTurn.toArray(new Unit[0]);
+	}
+
+	public int getFriendlyAttacksThisTurn() {
+	    return friendlyAttacksThisTurn;
+	}
+
+	public int getEnemyAttacksThisTurn() {
+	    return enemyAttacksThisTurn;
+	}
 
 }

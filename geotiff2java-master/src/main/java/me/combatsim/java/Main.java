@@ -44,7 +44,7 @@ public class Main {
                 // ---- Load weapons & scenario ----
                 WeaponLoader.loadFromCSV("/me/combatsim/java/weapons.csv");
                 sim.getUnitBootstrap().loadFromCSV("/me/combatsim/java/scenario.csv");
-
+                sim.moeCollector.initialize(sim.getUnitManager());
                 // ---- Menu ----
                 frame.setJMenuBar(MenuFactory.createMenuBar(sim, editorPanel));
 
@@ -58,4 +58,5 @@ public class Main {
             }
         });
     }
+    
 }

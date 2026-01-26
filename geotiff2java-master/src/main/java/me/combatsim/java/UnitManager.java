@@ -1,5 +1,6 @@
 package me.combatsim.java;
 
+ 
 import java.awt.AlphaComposite;
 import java.awt.BasicStroke;
 import java.awt.Color;
@@ -10,6 +11,7 @@ import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 import org.opengis.referencing.operation.MathTransform;
 
@@ -214,7 +216,28 @@ public class UnitManager {
         y = to.getY() - barb * Math.sin(theta - phi);
         g2.drawLine((int) to.getX(), (int) to.getY(), (int) x, (int) y);
     }
-    
+
+    public List<Unit> getFriendlyUnitsAlive() {
+        List<Unit> alive = new ArrayList<>();
+        for (Unit u : units) {
+            if (u.getUnitTeam() == UnitTeam.FRIENDLY &&
+                u.getUnitStatus() == UnitStatus.ALIVE) {
+                alive.add(u);
+            }
+        }
+        return alive;
+    }
+
+    public List<Unit> getEnemyUnitsAlive() {
+        List<Unit> alive = new ArrayList<>();
+        for (Unit u : units) {
+            if (u.getUnitTeam() == UnitTeam.ENEMY &&
+                u.getUnitStatus() == UnitStatus.ALIVE) {
+                alive.add(u);
+            }
+        }
+        return alive;
+    }
      
 
 }

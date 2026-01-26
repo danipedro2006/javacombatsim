@@ -32,9 +32,9 @@ public class CombatSimulator extends JPanel {
   private SimMode simMode = SimMode.EDIT;
   private int mouseX = -1, mouseY = -1;
   private final Timer battleTimer;
-  private final MOECollector moeCollector;
+  final MOECollector moeCollector;
   private int turn = 0;
-
+  
   public CombatSimulator() throws Exception {
 
     // ---- Map / CRS / DEM ----
@@ -44,6 +44,7 @@ public class CombatSimulator extends JPanel {
     unitManager = new UnitManager(ctx.utmToWgs, ctx.dem);
     unitFactory = new UnitFactory(ctx.dem, ctx.wgsToUtm, ctx.utmToWgs);
     unitBootstrap = new UnitBootstrap(unitFactory, unitManager);
+   
     OverlayEditorPanel editorPanel = new OverlayEditorPanel("operations.bmp");
 
     //JToolBar toolbar = ToolbarFactory.createOverlayEditorToolbar(editorPanel.getCore());
@@ -55,7 +56,8 @@ public class CombatSimulator extends JPanel {
     this.moeCollector = new MOECollector();
     // ---- Input ----
     new InputController(this, overlayManager);
-
+     
+    
     // ---- Mouse tracking ----
     addMouseMotionListener(new MouseMotionAdapter() {
       @Override
@@ -71,8 +73,11 @@ public class CombatSimulator extends JPanel {
       if (simMode != SimMode.BATTLE) {
         return; // do nothing in EDIT mode
       }
+      turn++;
       battleManager.runTurn(); // resolve combat first
       detectionManager.update(unitManager.getFriendlyUnits(), unitManager.getEnemyUnits());
+      moeCollector.collect(unitManager);
+      moeCollector.printToConsole();
       repaint();
     });
 	

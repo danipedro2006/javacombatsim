@@ -99,4 +99,47 @@ public class DetectionManager {
             }
         }
     }
+
+	 
+
+	public Map<UnitType, Integer> getDetectedFriendlyUnits() {
+	    Map<UnitType, Integer> result = new EnumMap<>(UnitType.class);
+	    Set<Unit> uniqueDetected = new HashSet<>();
+
+	    // Collect all detected targets (unique)
+	    for (List<Unit> detectedList : publicDetectionMap.values()) {
+	        uniqueDetected.addAll(detectedList);
+	    }
+
+	    // Filter + group
+	    for (Unit u : uniqueDetected) {
+	        if (u.getUnitStatus() != UnitStatus.ALIVE) continue;
+	        if (u.getUnitTeam() != UnitTeam.FRIENDLY) continue;
+
+	        result.merge(u.getUnitType(), 1, Integer::sum);
+	    }
+
+	    return result;
+	}
+
+	public Map<UnitType, Integer> getDetectedEnemyUnits() {
+	    Map<UnitType, Integer> result = new EnumMap<>(UnitType.class);
+	    Set<Unit> uniqueDetected = new HashSet<>();
+
+	    // Collect all detected targets (unique)
+	    for (List<Unit> detectedList : publicDetectionMap.values()) {
+	        uniqueDetected.addAll(detectedList);
+	    }
+
+	    // Filter + group
+	    for (Unit u : uniqueDetected) {
+	        if (u.getUnitStatus() != UnitStatus.ALIVE) continue;
+	        if (u.getUnitTeam() != UnitTeam.ENEMY) continue;
+
+	        result.merge(u.getUnitType(), 1, Integer::sum);
+	    }
+
+	    return result;
+	}
+
 }
