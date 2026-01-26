@@ -18,17 +18,14 @@ public class Unit {
 	private String name;
 
 	private boolean hasPlannedMove = false;
-	// ---- TRUE POSITION (UTM) ----
 	private double utmX;
 	private double utmY;
 	private double utmZ;
 	private Double plannedUtmX = null;
 	private Double plannedUtmY = null;
-	// ---- CACHED RENDER POSITION ----
 	private int pixelX;
 	private int pixelY;
 	private boolean isVisible;
-
 	private UnitStatus unitStatus = UnitStatus.ALIVE;
 	private double sensorRange;
 	private UnitType unitType;
@@ -36,7 +33,6 @@ public class Unit {
 	private double combatPower;
 	private String mapSymbol;
 	private double speed;
-	private List<Point> path = new ArrayList<>();
 	private final BufferedImage image;
 	private WeaponDefinition weapon;
 	private double unitRadius;
@@ -70,8 +66,6 @@ public class Unit {
 		if (this.image == null) {
 			throw new IllegalArgumentException("Unit image not found in resources: " + mapSymbol);
 		}
-
-		// Initial render position
 		updatePixelPosition(utmToWgs);
 	}
 
@@ -142,8 +136,6 @@ public class Unit {
 		utmY += dy / distance * step;
 	}
 
-	 
-
 	// ---- Getters ----
 	public int getPixelX() {
 		return pixelX;
@@ -167,10 +159,6 @@ public class Unit {
 
 	public BufferedImage getImage() {
 		return image;
-	}
-
-	public List<Point> getPath() {
-		return path;
 	}
 
 	// ----SETTERS----
@@ -219,84 +207,7 @@ public class Unit {
 		return weapon;
 	}
 
-//----Define Point class to store unitPath----
-
-	public static class Point {
-		public final int x;
-		public final int y;
-
-		public Point(int x, int y) {
-			this.x = x;
-			this.y = y;
-		}
-
-	}
-
-	/*
-	 * public boolean canDetect(Unit e, ElevationModel dem, MathTransform utmToWgs)
-	 * { if (!(this.getUnitStatus() == UnitStatus.ALIVE)) return false;
-	 * 
-	 * 
-	 * double distance = this.distance2dTo(e); // 2D distance is enough //return
-	 * distance <= this.sensorRange; return (distance <= this.sensorRange &&
-	 * hasLOS(this, e, dem, utmToWgs));//changed }
-	 */
-	/*
-	 * public boolean canDetect(Unit e, ElevationModel dem, MathTransform utmToWgs)
-	 * { // 1. Verificări de bază (Hard stops) if (this.getUnitStatus() !=
-	 * UnitStatus.ALIVE) return false;
-	 * 
-	 * double distance = this.distance2dTo(e); if (distance > this.sensorRange)
-	 * return false;
-	 * 
-	 * // 2. Line of Sight (Cea mai costisitoare operație, o facem după distanță) if
-	 * (!hasLOS(this, e, dem, utmToWgs)) { // Dacă pierdem LOS, scădem rapid scorul
-	 * de detecție (opțional) e.setDetectionScore(this, Math.max(0,
-	 * e.getDetectionScore(this) - 10)); return false; }
-	 * 
-	 * // 3. Power Law Formula // k = 2.0 pentru condiții normale, k = 4.0 pentru
-	 * condiții grele (ceață/tufișuri) double k = 2.0; double pBase = Math.pow(1.0 -
-	 * (distance / this.sensorRange), k);
-	 * 
-	 * // 4. Modificatori de context (Hacks) //if (e.isMoving()) pBase *= 2.0; //
-	 * Mișcarea dublează șansa de a fi observat //if (e.isFiring()) pBase *= 5.0; //
-	 * Tragerea cu arma face detecția aproape instantanee
-	 * 
-	 * // 5. Simulare eveniment random (The "Roll") if (Math.random() < pBase) { //
-	 * Nu "vedem" instant, ci creștem un buffer double currentScore =
-	 * e.getDetectionScore(this); e.setDetectionScore(this, Math.min(100,
-	 * currentScore + 20)); }
-	 * 
-	 * // 6. Rezultatul depinde de pragul de acumulare // Unitatea este considerată
-	 * detectată doar dacă scorul a trecut de 50 return e.getDetectionScore(this) >=
-	 * 50; }
-	 */
-	private void setDetectionScore(Unit unit, double d) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	private int getDetectionScore(Unit unit) {
-		// TODO Auto-generated method stub
-		return 0;
-	}
-
-	/*
-	 * public boolean canDetect(Unit target, ElevationModel dem, MathTransform
-	 * utmToWgs) {
-	 * 
-	 * // Cannot detect self if (target == this) return false;
-	 * 
-	 * // Must have sensor range if (sensorRange <= 0) return false;
-	 * 
-	 * // Distance check (2D) double distance = distance2dTo(target); if (distance >
-	 * sensorRange) return false;
-	 * 
-	 * // Line of sight check return hasLOS(this, target, dem, utmToWgs); }
-	 */
-
 	public static boolean hasLOS(Unit a, Unit b, ElevationModel dem, MathTransform utmToWgs) {
-// Simple step-based LOS (can be optimized later)
 		int steps = 50;
 		double dx = (b.utmX - a.utmX) / steps;
 		double dy = (b.utmY - a.utmY) / steps;
@@ -329,7 +240,6 @@ public class Unit {
 	}
 
 	public String getName() {
-		// TODO Auto-generated method stub
 		return name;
 	}
 
@@ -338,22 +248,18 @@ public class Unit {
 	}
 
 	public UnitTeam getUnitTeam() {
-		// TODO Auto-generated method stub
 		return unitTeam;
 	}
 
 	public Double getSensorRange() {
-		// TODO Auto-generated method stub
 		return sensorRange;
 	}
 
 	public UnitType getUnitType() {
-		// TODO Auto-generated method stub
 		return unitType;
 	}
 
 	public double getunitRadius() {
-		// TODO Auto-generated method stub
 		return unitRadius;
 	}
 
@@ -372,7 +278,6 @@ public class Unit {
 	public void setUtmPosition(double x, double y) {
 		this.utmX = x;
 		this.utmY = y;
-		
 	}
 
 	public void setPlannedTarget(double x, double y) {

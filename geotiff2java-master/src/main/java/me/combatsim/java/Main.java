@@ -47,7 +47,6 @@ public class Main {
                 sim.moeCollector.initialize(sim.getUnitManager());
                 // ---- Menu ----
                 frame.setJMenuBar(MenuFactory.createMenuBar(sim, editorPanel));
-
                 frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
                 frame.pack();
                 frame.setLocationRelativeTo(null);

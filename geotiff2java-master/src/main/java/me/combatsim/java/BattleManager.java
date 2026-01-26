@@ -104,18 +104,11 @@ public class BattleManager {
     // Attack
     boolean destroyed = rand.nextDouble() < hitChance;
     if (destroyed) {
-      // Update the *same instance* of the unit in UnitManager
       target.setUnitStatus(UnitStatus.DESTROYED);
-      unitsDestroyedThisTurn.add(target);
-      /*
-       * System.out.println("[COMBAT] " + attacker.getName() + " destroyed " +
-       * target.getName());
-       */
-    } else {
-      //            System.out.println("[COMBAT] " + attacker.getName() +
-      //                               " attacked " + target.getName() + " but missed");
-    }
+      unitsDestroyedThisTurn.add(target);    
+    } 
   }
+  
   private Unit findClosestAliveTarget(Unit attacker, List < Unit > targets) {
 
     Unit best = null;

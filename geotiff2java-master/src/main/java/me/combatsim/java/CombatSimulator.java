@@ -3,6 +3,7 @@ package me.combatsim.java;
 import java.awt.*;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionAdapter;
+import java.awt.geom.AffineTransform;
 
 import javax.swing.JPanel;
 import javax.swing.JToolBar;
@@ -13,7 +14,7 @@ import org.opengis.referencing.operation.MathTransform;
 import me.combatsim.java.map.ElevationModel;
 import me.combatsim.java.map.MapContext;
 import me.combatsim.java.map.MapUtils;
-import me.combatsim.java.overlay.BitmapOverlay;
+import me.combatsim.java.overlay.OperationsOverlay;
 import me.combatsim.java.overlay.LOSOverlay;
 import me.combatsim.java.overlay.Overlays;
 import me.combatsim.java.overlay.OverlayEditorOverlay;
@@ -21,176 +22,175 @@ import me.combatsim.java.overlay.OverlayEditorPanel;
 import me.combatsim.java.overlay.OverlayManager;
 
 public class CombatSimulator extends JPanel {
-  boolean toggleSensorOverlay = false;
-  private final MapContext ctx;
-  private final UnitManager unitManager;
-  private final UnitFactory unitFactory;
-  private final UnitBootstrap unitBootstrap;
-  private final OverlayManager overlayManager;
-  private final DetectionManager detectionManager;
-  private final BattleManager battleManager;
-  private SimMode simMode = SimMode.EDIT;
-  private int mouseX = -1, mouseY = -1;
-  private final Timer battleTimer;
-  final MOECollector moeCollector;
-  private int turn = 0;
-  
-  public CombatSimulator() throws Exception {
 
-    // ---- Map / CRS / DEM ----
-    ctx = new MapContext();
+	private final MapContext ctx;
+	private final UnitManager unitManager;
+	private final UnitFactory unitFactory;
+	private final UnitBootstrap unitBootstrap;
+	private final OverlayManager overlayManager;
+	private final DetectionManager detectionManager;
+	private final BattleManager battleManager;
+	private SimMode simMode = SimMode.EDIT;
+	private int mouseX = -1, mouseY = -1;
+	private final Timer battleTimer;
+	final MOECollector moeCollector;
+	private int turn = 0;
 
-    // ---- Core simulation objects ----
-    unitManager = new UnitManager(ctx.utmToWgs, ctx.dem);
-    unitFactory = new UnitFactory(ctx.dem, ctx.wgsToUtm, ctx.utmToWgs);
-    unitBootstrap = new UnitBootstrap(unitFactory, unitManager);
-   
-    OverlayEditorPanel editorPanel = new OverlayEditorPanel("operations.bmp");
+	public CombatSimulator() throws Exception {
 
-    //JToolBar toolbar = ToolbarFactory.createOverlayEditorToolbar(editorPanel.getCore());
-    	
-    // ---- Overlays ----
-    overlayManager = Overlays.create(ctx, unitManager);
-    detectionManager = new DetectionManager(ctx.dem, ctx.utmToWgs);
-    battleManager = new BattleManager(unitManager, detectionManager);
-    this.moeCollector = new MOECollector();
-    // ---- Input ----
-    new InputController(this, overlayManager);
-     
-    
-    // ---- Mouse tracking ----
-    addMouseMotionListener(new MouseMotionAdapter() {
-      @Override
-      public void mouseMoved(MouseEvent e) {
-        mouseX = e.getX();
-        mouseY = e.getY();
-        repaint();
-      }
-    });
+		// ---- Map / CRS / DEM ----
+		ctx = new MapContext();
 
-    // ---- Battle timer: 1 turn per second ----
-    battleTimer = new Timer(1000, e -> {
-      if (simMode != SimMode.BATTLE) {
-        return; // do nothing in EDIT mode
-      }
-      turn++;
-      battleManager.runTurn(); // resolve combat first
-      detectionManager.update(unitManager.getFriendlyUnits(), unitManager.getEnemyUnits());
-      moeCollector.collect(unitManager);
-      moeCollector.printToConsole();
-      repaint();
-    });
-	
-  }
+		// ---- Core simulation objects ----
+		unitManager = new UnitManager(ctx.utmToWgs, ctx.dem);
+		unitFactory = new UnitFactory(ctx.dem, ctx.wgsToUtm, ctx.utmToWgs);
+		unitBootstrap = new UnitBootstrap(unitFactory, unitManager);
 
-  @Override
-  protected void paintComponent(Graphics g) {
-    super.paintComponent(g);
+		OverlayEditorPanel editorPanel = new OverlayEditorPanel("operations.bmp");
 
-    g.drawImage(ctx.map, 0, 0, null);
+		// ---- Overlays ----
+		overlayManager = Overlays.create(ctx, unitManager);
+		detectionManager = new DetectionManager(ctx.dem, ctx.utmToWgs);
+		battleManager = new BattleManager(unitManager, detectionManager);
+		this.moeCollector = new MOECollector();
+		// ---- Input ----
+		new InputController(this, overlayManager);
 
-    // --- Units ---
-    Graphics2D gUnits = (Graphics2D) g.create();
-    unitManager.updateRenderPositions();
-    unitManager.draw(gUnits);
-    gUnits.dispose();
+		// ---- Mouse tracking ----
+		addMouseMotionListener(new MouseMotionAdapter() {
+			@Override
+			public void mouseMoved(MouseEvent e) {
+				mouseX = e.getX();
+				mouseY = e.getY();
+				repaint();
+			}
+		});
 
-    // --- Overlays ---
-    Graphics2D gOverlays = (Graphics2D) g.create();
+		// ---- Battle timer: 1 turn per second ----
+		battleTimer = new Timer(1000, e -> {
+			if (simMode != SimMode.BATTLE) {
+				return; // do nothing in EDIT mode
+			}
+			turn++;
+			battleManager.runTurn(); // resolve combat first
+			detectionManager.update(unitManager.getFriendlyUnits(), unitManager.getEnemyUnits());
+			moeCollector.collect(unitManager);
+			moeCollector.printToConsole();
+			repaint();
+		});
 
-    if (toggleSensorOverlay) {
-      overlayManager.drawOverlays(gOverlays);
-    }
-    gOverlays.dispose();
+	}
 
-    // --- Detection ---
-    Graphics2D gDetect = (Graphics2D) g.create();
-    //detectionManager.update(unitManager.getFriendlyUnits(), unitManager.getEnemyUnits());
-    detectionManager.draw(gDetect);
-    gDetect.dispose();
+	@Override
+	protected void paintComponent(Graphics g) {
+	    super.paintComponent(g);
 
-    // Mouse UTM display
-    if (mouseX >= 0 && mouseY >= 0) {
-      try {
-        var utm = MapUtils.pixelToUTM(mouseX, mouseY, ctx.wgsToUtm);
-        double z = MapUtils.getElevationAtPixel(ctx.dem, mouseX, mouseY);
+	    // Draw base map
+	    g.drawImage(ctx.map, 0, 0, null);
 
-        g.setColor(new Color(0, 0, 0, 170));
-        g.fillRect(5, 5, 420, 25);
+	    // --- Overlays ---
+	    Graphics2D gOverlays = (Graphics2D) g.create();
+	    LOSOverlay los = overlayManager.get(LOSOverlay.class);
+	    if (los != null && los.isVisible()) {
+	        los.draw(gOverlays);
+	    }
+	    // If you have other overlays like OperationsOverlay, same: draw with own Graphics2D
+	    Graphics2D gOps = (Graphics2D) g.create();
+	    OperationsOverlay ops = overlayManager.get(OperationsOverlay.class);
+	    if (ops != null && ops.isVisible()) {
+	        ops.draw(gOps);
+	    }
+	    gOverlays.dispose();
+	    gOps.dispose();
 
-        g.setColor(Color.WHITE);
-        g.drawString(String.format("UTM X %.1f  Y %.1f  Z %.1f m", utm.x, utm.y, z), 10, 22);
-      } catch (Exception ignored) {}
-    }
-  }
+	    // --- Detection ---
+	    Graphics2D gDetect = (Graphics2D) g.create();
+	    detectionManager.draw(gDetect);
+	    gDetect.dispose();
 
-  @Override
-  public Dimension getPreferredSize() {
-    return new Dimension(ctx.map.getWidth(), ctx.map.getHeight());
-  }
+	    // --- Units last: faded & crossed if destroyed ---
+	    Graphics2D gUnits = (Graphics2D) g.create();
+	    unitManager.updateRenderPositions();
+	    unitManager.draw(gUnits);
+	    gUnits.dispose();
 
-  // ---- Expose for menus / UI ----
-  public UnitBootstrap getUnitBootstrap() {
-    return unitBootstrap;
-  }
+	    // --- Mouse info ---
+	    if (mouseX >= 0 && mouseY >= 0) {
+	        try {
+	            var utm = MapUtils.pixelToUTM(mouseX, mouseY, ctx.wgsToUtm);
+	            double z = MapUtils.getElevationAtPixel(ctx.dem, mouseX, mouseY);
 
-  public UnitManager getUnitManager() {
-    return unitManager;
-  }
+	            g.setColor(new Color(0, 0, 0, 170));
+	            g.fillRect(5, 5, 420, 25);
 
-  public DetectionManager getDetectionManager() {
-    return detectionManager;
-  }
-
-  public BattleManager getBattleManager() {
-    return battleManager;
-  }
-
-  public void startBattle() {
-    setSimMode(SimMode.BATTLE);
-    System.out.println("[SIM MODE] changed to " + simMode);
-    battleTimer.start();
-  }
-
-  public void stopBattle() {
-    setSimMode(SimMode.EDIT);
-    System.out.println("[SIM MODE] changed to " + simMode);
-    battleTimer.stop();
-  }
-
-  public void toggleLOS() {
-    overlayManager.toggle(LOSOverlay.class);
-    repaint();
-  }
-
-  public void toggleSensor() {
-    toggleSensorOverlay = !toggleSensorOverlay;
-    repaint();
-  }
-
-  public void toggleOperations() {
-    overlayManager.toggle(BitmapOverlay.class);
-    repaint();
-  }
-  public void setSimMode(SimMode mode) {
-    this.simMode = mode;
-    System.out.println("[SIM MODE] changed to " + mode);
-  }
-
-  public MathTransform getWgsToUtm() {
-    return ctx.wgsToUtm;
-  }
-
-  public ElevationModel getDem() {
-    return ctx.dem;
-  }
-
-public OverlayManager getOverlayManager() {
-	 
-	return overlayManager;
-}
+	            g.setColor(Color.WHITE);
+	            g.drawString(String.format("UTM X %.1f  Y %.1f  Z %.1f m", utm.x, utm.y, z), 10, 22);
+	        } catch (Exception ignored) {}
+	    }
+	}
 
 
 
+	@Override
+	public Dimension getPreferredSize() {
+		return new Dimension(ctx.map.getWidth(), ctx.map.getHeight());
+	}
+
+	// ---- Expose for menus / UI ----
+	public UnitBootstrap getUnitBootstrap() {
+		return unitBootstrap;
+	}
+
+	public UnitManager getUnitManager() {
+		return unitManager;
+	}
+
+	public DetectionManager getDetectionManager() {
+		return detectionManager;
+	}
+
+	public BattleManager getBattleManager() {
+		return battleManager;
+	}
+
+	public void startBattle() {
+		setSimMode(SimMode.BATTLE);
+		System.out.println("[SIM MODE] changed to " + simMode);
+		battleTimer.start();
+	}
+
+	public void stopBattle() {
+		setSimMode(SimMode.EDIT);
+		System.out.println("[SIM MODE] changed to " + simMode);
+		battleTimer.stop();
+	}
+
+	public void setLOSVisible(boolean visible) {
+		overlayManager.setVisible(LOSOverlay.class, visible);
+		repaint();
+	}
+
+	public void setOperationsOverlayVisible(boolean visible) {
+		overlayManager.setVisible(OperationsOverlay.class, visible);
+		repaint();
+	}
+
+	public void setSimMode(SimMode mode) {
+		this.simMode = mode;
+		System.out.println("[SIM MODE] changed to " + mode);
+	}
+
+	public MathTransform getWgsToUtm() {
+		return ctx.wgsToUtm;
+	}
+
+	public ElevationModel getDem() {
+		return ctx.dem;
+	}
+
+	public OverlayManager getOverlayManager() {
+
+		return overlayManager;
+	}
 
 }

@@ -1,140 +1,156 @@
 package me.combatsim.java;
 
 import javax.swing.*;
+import java.awt.Point;
 import java.awt.event.*;
-
 import org.geotools.geometry.DirectPosition2D;
-
 import me.combatsim.java.map.MapUtils;
-import me.combatsim.java.overlay.BitmapOverlay;
+import me.combatsim.java.overlay.OperationsOverlay;
 import me.combatsim.java.overlay.LOSOverlay;
 import me.combatsim.java.overlay.OverlayEditorOverlay;
 import me.combatsim.java.overlay.OverlayManager;
 
 public class InputController {
+	Point first = null;
+	private Unit draggedUnit = null;
+	private boolean dragging = false;
 
-    private Unit draggedUnit = null;
-    private boolean dragging = false;
+	private Unit arrowUnit = null;
+	private boolean planningMove = false;
 
-    private Unit arrowUnit = null;
-    private boolean planningMove = false;
+	private final CombatSimulator combatSimulator;
+	private final OverlayManager overlayManager;
 
-    private final CombatSimulator app;
-    private final OverlayManager overlayManager;
+	public InputController(CombatSimulator combatSimulator, OverlayManager overlayManager) {
+		this.combatSimulator = combatSimulator;
+		this.overlayManager = overlayManager;
+		install();
+	}
 
-    public InputController(CombatSimulator app, OverlayManager overlayManager) {
-        this.app = app;
-        this.overlayManager = overlayManager;
-        install();
-    }
+	private OverlayEditorOverlay getEditor() {
+		return overlayManager.get(OverlayEditorOverlay.class);
+	}
 
-    private OverlayEditorOverlay getEditor() {
-        return overlayManager.get(OverlayEditorOverlay.class);
-    }
+	private void install() {
 
-    private void install() {
+		// ---------------- MOUSE LISTENER ----------------
+		combatSimulator.addMouseListener(new MouseAdapter() {
 
-        // ---------------- MOUSE LISTENER ----------------
-        app.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mousePressed(MouseEvent e) {
 
-            @Override
-            public void mousePressed(MouseEvent e) {
+				// SHIFT + LEFT → distance measurement
+				if (SwingUtilities.isLeftMouseButton(e) && e.isShiftDown()) {
+					LOSOverlay los = overlayManager.get(LOSOverlay.class);
+					if (!los.isVisible())
+						return;
+					if (first == null) {
+						first = e.getPoint();
+					} else {
+						Point second = e.getPoint();
+						double d = los.distanceMeters(first.x, first.y, second.x, second.y);
+						los.setDistancePoints(first, second, d);
+						first = null;
+						combatSimulator.repaint();
+					}
+					return; // IMPORTANT: stop further processing
+				}
 
-                OverlayEditorOverlay editor = getEditor();
-                if (editor != null && editor.isVisible()) {
-                    editor.mousePressed(e);
-                    app.repaint();
-                    return; // editor consumes input
-                }
+				OverlayEditorOverlay editor = getEditor();
+				if (editor != null && editor.isVisible()) {
+					editor.mousePressed(e);
+					combatSimulator.repaint();
+					return; // editor consumes input
+				}
 
-                // CTRL + LEFT → planned move
-                if (SwingUtilities.isLeftMouseButton(e) && e.isControlDown()) {
-                    arrowUnit = app.getUnitManager().getUnitAtPixel(e.getX(), e.getY());
-                    planningMove = (arrowUnit != null);
-                    return;
-                }
+				// CTRL + LEFT → planned move
+				if (SwingUtilities.isLeftMouseButton(e) && e.isControlDown()) {
+					arrowUnit = combatSimulator.getUnitManager().getUnitAtPixel(e.getX(), e.getY());
+					planningMove = (arrowUnit != null);
+					return;
+				}
 
-                // LEFT → unit drag
-                if (SwingUtilities.isLeftMouseButton(e)) {
-                    draggedUnit = app.getUnitManager().getUnitAtPixel(e.getX(), e.getY());
-                    dragging = (draggedUnit != null);
-                    return;
-                }
+				// LEFT → unit drag
+				if (SwingUtilities.isLeftMouseButton(e)) {
+					draggedUnit = combatSimulator.getUnitManager().getUnitAtPixel(e.getX(), e.getY());
+					dragging = (draggedUnit != null);
+					return;
+				}
 
-                // RIGHT → LOS
-                if (SwingUtilities.isRightMouseButton(e)) {
-                    LOSOverlay los = overlayManager.get(LOSOverlay.class);
-                    if (los != null) {
-                        los.toggle();
-                        los.computeLOS(e.getX(), e.getY());
-                        app.repaint();
-                    }
-                }
-            }
+				// RIGHT → LOS
+				if (SwingUtilities.isRightMouseButton(e)) {
+					LOSOverlay los = overlayManager.get(LOSOverlay.class);
+					if (!los.isVisible())
+						return;
 
-            @Override
-            public void mouseReleased(MouseEvent e) {
+					los.computeLOS(e.getX(), e.getY());
+					combatSimulator.repaint();
+				}
+			}
 
-                OverlayEditorOverlay editor = getEditor();
-                if (editor != null && editor.isVisible()) {
-                    editor.mouseReleased(e);
-                    app.repaint();
-                    return;
-                }
+			@Override
+			public void mouseReleased(MouseEvent e) {
+				OverlayEditorOverlay editor = getEditor();
+				if (editor != null && editor.isVisible()) {
+					editor.mouseReleased(e);
+					combatSimulator.repaint();
+					return;
+				}
 
-                dragging = false;
-                draggedUnit = null;
-                planningMove = false;
-                arrowUnit = null;
-            }
-        });
+				dragging = false;
+				draggedUnit = null;
+				planningMove = false;
+				arrowUnit = null;
+			}
+		});
 
-        // ---------------- MOUSE MOTION ----------------
-        app.addMouseMotionListener(new MouseMotionAdapter() {
+		// ---------------- MOUSE MOTION ----------------
+		combatSimulator.addMouseMotionListener(new MouseMotionAdapter() {
 
-            @Override
-            public void mouseDragged(MouseEvent e) {
+			@Override
+			public void mouseDragged(MouseEvent e) {
 
-                OverlayEditorOverlay editor = getEditor();
-                if (editor != null && editor.isVisible()) {
-                    editor.mouseDragged(e);
-                    app.repaint();
-                    return;
-                }
+				OverlayEditorOverlay editor = getEditor();
+				if (editor != null && editor.isVisible()) {
+					editor.mouseDragged(e);
+					combatSimulator.repaint();
+					return;
+				}
 
-                // Planned move
-                if (planningMove && arrowUnit != null) {
-                    try {
-                        DirectPosition2D utm =
-                                MapUtils.pixelToUTM(e.getX(), e.getY(), app.getWgsToUtm());
-                        arrowUnit.setPlannedTarget(utm.x, utm.y);
-                        app.repaint();
-                    } catch (Exception ignored) {}
-                    return;
-                }
+				// Planned move
+				if (planningMove && arrowUnit != null) {
+					try {
+						DirectPosition2D utm = MapUtils.pixelToUTM(e.getX(), e.getY(), combatSimulator.getWgsToUtm());
+						arrowUnit.setPlannedTarget(utm.x, utm.y);
+						combatSimulator.repaint();
+					} catch (Exception ignored) {
+					}
+					return;
+				}
 
-                // Unit dragging
-                if (dragging && draggedUnit != null) {
-                    try {
-                        draggedUnit.setPixelPosition(e.getX(), e.getY());
-                        draggedUnit.syncUtmFromPixel(app.getWgsToUtm(), app.getDem());
-                        app.repaint();
-                    } catch (Exception ignored) {}
-                }
-            }
-        });
+				// Unit dragging
+				if (dragging && draggedUnit != null) {
+					try {
+						draggedUnit.setPixelPosition(e.getX(), e.getY());
+						draggedUnit.syncUtmFromPixel(combatSimulator.getWgsToUtm(), combatSimulator.getDem());
+						combatSimulator.repaint();
+					} catch (Exception ignored) {
+					}
+				}
+			}
+		});
 
-        // ---------------- KEYBOARD ----------------
-        InputMap im = app.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW);
-        ActionMap am = app.getActionMap();
+		// ---------------- KEYBOARD ----------------
+		InputMap im = combatSimulator.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW);
+		ActionMap am = combatSimulator.getActionMap();
 
-        im.put(KeyStroke.getKeyStroke("ctrl G"), "toggleOps");
-        am.put("toggleOps", new AbstractAction() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                overlayManager.toggle(BitmapOverlay.class);
-                app.repaint();
-            }
-        });
-    }
+		im.put(KeyStroke.getKeyStroke("ctrl G"), "toggleOps");
+		am.put("toggleOps", new AbstractAction() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				overlayManager.setVisible(OperationsOverlay.class, true);
+				combatSimulator.repaint();
+			}
+		});
+	}
 }

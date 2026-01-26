@@ -18,23 +18,25 @@ public class LOSOverlay implements Overlay {
     private final MathTransform utmToWgs; // inverse of wgsToUtm
     private final int mapWidth;
     private final int mapHeight;
+ // ---- Distance measurement ----
+    private Point distanceP1 = null;
+    private Point distanceP2 = null;
+    private Double distanceMeters = null;
 
     private final List<Line2D> losLines = new ArrayList<>();
      
-    private boolean visible = true;
+    private boolean visible=false;
+
     
     public LOSOverlay(ElevationModel dem, MathTransform wgsToUtm, int mapWidth, int mapHeight) throws Exception {
         this.dem = dem;
         this.utmToWgs = wgsToUtm.inverse(); // store inverse for UTM -> WGS84
         this.mapWidth = mapWidth;
         this.mapHeight = mapHeight;
+         
     }
 
-    /** Toggle visibility */
-    public void toggle() {
-        visible = !visible;
-        if (visible) losLines.clear(); // recalc when turned on
-    }
+    
 
     /**
      * Compute 360° LOS from a pixel observer
@@ -92,20 +94,76 @@ public class LOSOverlay implements Overlay {
     @Override
     public void draw(Graphics2D g) {
         if (!visible) return;
-
-        g.setColor(new Color(255, 0, 0, 120));
+        System.out.println("[LOSOverlay] draw()");
+        g.setColor(Color.RED);
         for (Line2D line : losLines) {
             g.draw(line);
         }
+        
+     // ---- Distance overlay ----
+        if (distanceP1 != null && distanceP2 != null && distanceMeters != null) {
+            g.setColor(Color.RED);
+            g.setStroke(new BasicStroke(2f));
+            g.drawLine(
+                distanceP1.x, distanceP1.y,
+                distanceP2.x, distanceP2.y
+            );
+
+            int mx = (distanceP1.x + distanceP2.x) / 2;
+            int my = (distanceP1.y + distanceP2.y) / 2;
+
+            String label = String.format("%.1f m", distanceMeters);
+
+            g.setColor(new Color(0, 0, 0, 180));
+            g.fillRect(mx - 30, my - 15, 70, 20);
+
+            g.setColor(Color.WHITE);
+            g.drawString(label, mx - 25, my);
+        }
+
     }
 
     public boolean isVisible() {
-        return visible;
+        return this.visible;
     }
+ 
+	/**
+	 * Distance in meters between two pixel points
+	 */
+	public double distanceMeters(int x1, int y1, int x2, int y2) {
+	    try {
+	        // Pixel → UTM
+	        DirectPosition2D p1 = MapUtils.pixelToUTM(x1, y1, utmToWgs.inverse());
+	        DirectPosition2D p2 = MapUtils.pixelToUTM(x2, y2, utmToWgs.inverse());
 
+	        double dx = p2.x - p1.x;
+	        double dy = p2.y - p1.y;
+
+	        return Math.sqrt(dx * dx + dy * dy);
+	    } catch (Exception e) {
+	        e.printStackTrace();
+	        return -1;
+	    }
+	}
+	public void setDistancePoints(Point p1, Point p2, double meters) {
+	    this.distanceP1 = p1;
+	    this.distanceP2 = p2;
+	    this.distanceMeters = meters;
+	}
 	@Override
 	public void setVisible(boolean visible) {
-		// TODO Auto-generated method stub
-		
+	    this.visible = visible;
+
+	    if (!visible) {
+	        losLines.clear();
+	        distanceP1 = null;
+	        distanceP2 = null;
+	        distanceMeters = null;
+	    }
 	}
+
+	 
+
+
+
 }

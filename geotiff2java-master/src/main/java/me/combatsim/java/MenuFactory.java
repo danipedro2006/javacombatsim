@@ -36,13 +36,21 @@ public class MenuFactory {
         fileMenu.add(exitItem);
 
         JCheckBoxMenuItem los = new JCheckBoxMenuItem("LOS");
-        los.addActionListener(e -> combatSimulator.toggleLOS());
+        los.addActionListener(e -> {
+            JCheckBoxMenuItem cb = (JCheckBoxMenuItem) e.getSource();
+            System.out.println("Check box visible "+cb.isSelected());
+            combatSimulator.setLOSVisible(cb.isSelected());
+        });
 
         JCheckBoxMenuItem opsOverlay = new JCheckBoxMenuItem("Operations Overlay");
-        opsOverlay.addActionListener(e -> combatSimulator.toggleOperations());
+        opsOverlay.addActionListener(e -> {
+            JCheckBoxMenuItem cb = (JCheckBoxMenuItem) e.getSource();
+            combatSimulator.setOperationsOverlayVisible(cb.isSelected());
+        });
 
         JCheckBoxMenuItem sensorOverlay = new JCheckBoxMenuItem("Sensors Overlay");
-        sensorOverlay.addActionListener(e -> combatSimulator.toggleSensor());
+        
+            
 
         // ---- NEW: Overlay Editor toggle ----
         JCheckBoxMenuItem overlayEditorToggle = new JCheckBoxMenuItem("Overlay Editor");

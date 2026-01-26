@@ -15,7 +15,7 @@ import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
 
-public class a {
+public class ScenarioEdit {
 
     public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> {

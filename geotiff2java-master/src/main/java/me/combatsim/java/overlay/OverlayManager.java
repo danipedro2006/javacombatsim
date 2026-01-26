@@ -33,13 +33,6 @@ public class OverlayManager {
         return null;
     }
 
-    /** Toggle visibility of overlay by type */
-    public void toggle(Class<? extends Overlay> type) {
-        Overlay o = get(type);
-        if (o != null) {
-            o.setVisible(!o.isVisible());
-        }
-    }
     public boolean hasActiveOverlays() {
         for (Overlay o : overlays) {
             if (o.isVisible()) {
@@ -48,10 +41,11 @@ public class OverlayManager {
         }
         return false;
     }
-
-	public void save() {
-		// TODO Auto-generated method stub
-		
-	}
+    public void setVisible(Class<? extends Overlay> type, boolean visible) {
+        Overlay o = get(type);
+        if (o != null) {
+            o.setVisible(visible);
+        }
+    }
 
 }

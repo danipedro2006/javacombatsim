@@ -11,7 +11,7 @@ public class Overlays {
 
 		OverlayManager om = new OverlayManager();
 
-		om.addOverlay(new BitmapOverlay("/operations.bmp"));
+		om.addOverlay(new OperationsOverlay("/operations.bmp"));
 		om.addOverlay(new UnitOverlay(unitManager));
 		om.addOverlay(new LOSOverlay(ctx.dem, ctx.wgsToUtm, ctx.map.getWidth(), ctx.map.getHeight()));
 		om.addOverlay(new OverlayEditorOverlay("C:/Users/danie/Downloads/geotiff2java-master/geotiff2java-master/src/main/resources/operations.bmp"));

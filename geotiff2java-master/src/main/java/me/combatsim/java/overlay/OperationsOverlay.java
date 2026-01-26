@@ -6,13 +6,13 @@ import java.io.IOException;
 
 import javax.imageio.ImageIO;
 
-public class BitmapOverlay implements Overlay {
+public class OperationsOverlay implements Overlay {
 
     private final BufferedImage image;
     private boolean visible = false;
 
-    public BitmapOverlay(String resourcePath) throws IOException {
-        this.image = ImageIO.read(BitmapOverlay.class.getResource(resourcePath));
+    public OperationsOverlay(String resourcePath) throws IOException {
+        this.image = ImageIO.read(OperationsOverlay.class.getResource(resourcePath));
 
         if (image == null) {
             throw new IllegalArgumentException("Bitmap not found: " + resourcePath);

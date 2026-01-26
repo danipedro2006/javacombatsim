@@ -100,8 +100,7 @@ public class DetectionManager {
         }
     }
 
-	 
-
+ 
 	public Map<UnitType, Integer> getDetectedFriendlyUnits() {
 	    Map<UnitType, Integer> result = new EnumMap<>(UnitType.class);
 	    Set<Unit> uniqueDetected = new HashSet<>();
